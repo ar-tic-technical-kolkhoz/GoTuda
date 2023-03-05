@@ -1,0 +1,51 @@
+package com.vk59.gotuda.map.osm
+
+import android.preference.PreferenceManager
+import android.view.View
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.fragment.app.Fragment
+import com.vk59.gotuda.R.drawable
+import com.vk59.gotuda.map.MapViewDelegate
+import com.vk59.gotuda.map.model.GoGeoPoint
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+
+class OsmMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
+
+  private val fragmentContext = fragment.requireContext()
+
+  private var map: MapView? = null
+
+  override fun initMapView(mapView: View) {
+    map = mapView as? MapView? ?: throw IllegalStateException("Incorrect type of MapView ${mapView.javaClass}")
+  }
+
+  override fun showUserLocation() {
+    Configuration.getInstance().load(
+      fragmentContext.applicationContext,
+      PreferenceManager.getDefaultSharedPreferences(fragmentContext.applicationContext)
+    )
+    val mapView = map ?: throw IllegalStateException("Necessary to call initMapView previously")
+    mapView.setTileSource(TileSourceFactory.MAPNIK)
+    val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(fragmentContext), mapView)
+    locationOverlay.setPersonIcon(ContextCompat.getDrawable(fragmentContext, drawable.user_geo)?.toBitmap())
+    locationOverlay.setDirectionIcon(ContextCompat.getDrawable(fragmentContext, drawable.user_geo)?.toBitmap())
+    locationOverlay.enableMyLocation()
+    mapView.overlays.add(locationOverlay)
+  }
+
+  override fun moveToUserLocation(geoPoint: GoGeoPoint) {
+    val mapView = map ?: throw java.lang.NullPointerException("Necessary to call initMapView previously")
+
+    mapView.controller.animateTo(GeoPoint(geoPoint.latitude, geoPoint.longitude), 18.0, 1000)
+  }
+
+  override fun addPlacemark(geoPoint: GoGeoPoint, drawableInt: Int) {
+    TODO("Not yet implemented")
+  }
+}
