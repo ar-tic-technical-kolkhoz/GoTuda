@@ -6,6 +6,7 @@ import com.facebook.flipper.android.utils.FlipperUtils
 import com.facebook.flipper.plugins.inspector.DescriptorMapping
 import com.facebook.flipper.plugins.inspector.InspectorFlipperPlugin
 import com.facebook.soloader.SoLoader
+import com.yandex.mapkit.MapKitFactory
 
 class GoTudaApplication() : Application() {
 
@@ -18,5 +19,7 @@ class GoTudaApplication() : Application() {
       client.addPlugin(InspectorFlipperPlugin(this, DescriptorMapping.withDefaults()))
       client.start()
     }
+
+    MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
   }
 }

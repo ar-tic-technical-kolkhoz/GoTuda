@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.vk59.gotuda.R
 import com.vk59.gotuda.button_list.ButtonsAdapter.ButtonVH
+import com.vk59.gotuda.core.colorAttr
 
 class ButtonsAdapter : ListAdapter<ButtonUiModel, ButtonVH>(diffUtilCallback) {
 
@@ -17,6 +18,7 @@ class ButtonsAdapter : ListAdapter<ButtonUiModel, ButtonVH>(diffUtilCallback) {
     return ButtonVH(Button(parent.context).apply {
       layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
       setBackgroundResource(R.drawable.button_background)
+      setTextColor(parent.colorAttr(R.attr.textOnControlMain))
     })
   }
 
@@ -24,7 +26,7 @@ class ButtonsAdapter : ListAdapter<ButtonUiModel, ButtonVH>(diffUtilCallback) {
     holder.bind(currentList[position])
   }
 
-  inner class ButtonVH(val button: Button) : RecyclerView.ViewHolder(button) {
+  inner class ButtonVH(private val button: Button) : RecyclerView.ViewHolder(button) {
 
     @SuppressLint("SetTextI18n")
     fun bind(buttonUiModel: ButtonUiModel) {
