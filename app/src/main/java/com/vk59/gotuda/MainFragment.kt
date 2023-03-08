@@ -107,7 +107,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
   private fun launchSettings() {
     parentFragmentManager.beginTransaction()
-      .add(SettingsFragment(), "settings")
+      .replace(R.id.fragment_container, SettingsFragment())
       .addToBackStack("main")
       .commit()
   }

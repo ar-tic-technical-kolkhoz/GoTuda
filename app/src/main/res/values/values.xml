@@ -6,4 +6,6 @@
 
   <attr format="color" name="textMain"/>
   <attr format="color" name="textOnControlMain"/>
+
+  <attr format="color" name="line"/>
 </resources>
