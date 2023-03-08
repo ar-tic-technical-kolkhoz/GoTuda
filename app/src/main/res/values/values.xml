@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <attr format="color" name="bgMain"/>
+  <attr format="color" name="bgMinor"/>
   <attr format="color" name="controlMain"/>
+
+  <attr format="color" name="textMain"/>
   <attr format="color" name="textOnControlMain"/>
 </resources>

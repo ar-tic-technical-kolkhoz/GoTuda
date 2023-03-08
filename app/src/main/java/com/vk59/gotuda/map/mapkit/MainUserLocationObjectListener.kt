@@ -14,6 +14,9 @@ class MainUserLocationObjectListener(private val context: Context = SimpleDi.con
     userLocationView.pin.setIcon(
       ImageProvider.fromResource(context, R.drawable.user_geo)
     )
+
+    userLocationView.accuracyCircle.isVisible = false
+    userLocationView.arrow.setIcon(ImageProvider.fromResource(context, R.drawable.user_geo))
   }
 
   override fun onObjectRemoved(p0: UserLocationView) {

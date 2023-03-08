@@ -8,7 +8,6 @@ import com.vk59.gotuda.map.model.GoGeoPoint
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
-import com.yandex.mapkit.map.MapType.MAP
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
 
@@ -20,7 +19,7 @@ class YandexMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
 
   override fun initMapView(mapView: View) {
     map = mapView as MapView
-    mapView.map.mapType = MAP
+    mapView.map.isRotateGesturesEnabled = false
     if (fragment.requireContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
       mapView.map.isNightModeEnabled = true
     }

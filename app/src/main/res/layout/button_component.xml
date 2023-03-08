@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="8dp"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+  <TextView
+      android:id="@+id/title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textColor="?attr/textOnControlMain"
+      android:textSize="16sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toTopOf="@id/subtitle"
+      tools:text="Title"
+      tools:textColor="@color/black"
+      />
+
+  <TextView
+      android:id="@+id/subtitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textSize="13sp"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/title"
+      app:layout_constraintBottom_toBottomOf="parent"
+      tools:text="Subtitle"
+      />
+
+</merge>

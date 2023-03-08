@@ -12,5 +12,6 @@ abstract class MapViewDelegate(protected val fragment: Fragment) {
   abstract fun moveToUserLocation(geoPoint: GoGeoPoint)
 
   abstract fun addPlacemark(geoPoint: GoGeoPoint, @DrawableRes drawableInt: Int)
+
   abstract fun showUserLocation()
 }
