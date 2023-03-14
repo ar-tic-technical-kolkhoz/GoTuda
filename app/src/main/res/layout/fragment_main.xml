@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/container"
     >
 
   <org.osmdroid.views.MapView
       android:id="@+id/map_view"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       android:visibility="gone"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
@@ -20,8 +20,8 @@
 
   <com.yandex.mapkit.mapview.MapView
       android:id="@+id/map_kit"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       android:visibility="visible"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
@@ -29,39 +29,46 @@
       app:layout_constraintTop_toTopOf="parent"
       />
 
-  <include
-      android:id="@+id/mainBottomButtons"
-      layout="@layout/layout_bottom_buttons"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      app:layout_constraintBottom_toTopOf="@+id/button_list"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      />
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:paddingTop="24dp"
+      >
 
-  <com.vk59.gotuda.button_list.ButtonListLayout
-      android:id="@+id/button_list"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_margin="@dimen/margin_border"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      />
+    <include
+        android:id="@+id/mainBottomButtons"
+        layout="@layout/layout_bottom_buttons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/button_list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
-  <com.google.android.material.imageview.ShapeableImageView
-      android:id="@+id/user_photo"
-      android:layout_width="56dp"
-      android:layout_height="56dp"
-      android:layout_marginTop="16dp"
-      android:layout_marginEnd="16dp"
-      android:src="@color/dark_grey"
-      app:strokeColor="?attr/line"
-      app:strokeWidth="1dp"
-      app:shapeAppearance="@style/roundedImageViewRounded"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      />
+    <com.vk59.gotuda.button_list.ButtonListLayout
+        android:id="@+id/button_list"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_border"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/user_photo"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@color/dark_grey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearance="@style/roundedImageViewRounded"
+        app:strokeColor="?attr/line"
+        app:strokeWidth="1dp"
+        />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

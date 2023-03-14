@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     android:background="?attr/bgMain"
     android:orientation="vertical"
+    android:paddingTop="24dp"
     >
 
   <TextView
@@ -48,15 +49,15 @@
       android:layout_marginTop="16dp"
       android:paddingVertical="16dp"
       app:component_background="@color/dark_grey"
-      app:component_title="Редактировать"
       app:component_text_color="?attr/textOnControlMain"
+      app:component_title="Редактировать"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@id/user_name"
       tools:background="green"
       />
 
-<!--  TODO: Use recycler view -->
+  <!--  TODO: Use recycler view -->
   <TextView
       android:id="@+id/statistics_title"
       android:layout_width="match_parent"

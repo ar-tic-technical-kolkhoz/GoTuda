@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     android:background="?attr/bgMain"
     android:orientation="vertical"
+    android:paddingTop="24dp"
     >
 
   <TextView
