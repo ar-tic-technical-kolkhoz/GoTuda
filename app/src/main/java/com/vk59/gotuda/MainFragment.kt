@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.bumptech.glide.Glide
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
 import com.vk59.gotuda.databinding.FragmentMainBinding
@@ -27,6 +28,7 @@ import com.vk59.gotuda.di.SimpleDi.multipleMapDelegate
 import com.vk59.gotuda.map.MultipleMapDelegate
 import com.vk59.gotuda.map.mapkit.YandexMapViewDelegate
 import com.vk59.gotuda.map.osm.OsmMapViewDelegate
+import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -44,8 +46,20 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+    val request = Glide.with(requireContext()).load("https://crypto.ru/wp-content/plugins/q-auth/assets/img/default-user.png")
+    request.into(binding.userPhoto)
+    binding.userPhoto.setOnClickListener {
+      launchPassport()
+    }
     initMap()
     launchDebugBottomButtons()
+  }
+
+  private fun launchPassport() {
+    parentFragmentManager.beginTransaction()
+      .replace(R.id.fragment_container, ProfileFragment())
+      .addToBackStack("main")
+      .commit()
   }
 
   override fun onStart() {

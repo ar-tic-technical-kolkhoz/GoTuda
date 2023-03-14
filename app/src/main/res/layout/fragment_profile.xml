@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/bgMain"
+    android:orientation="vertical"
+    >
+
+  <TextView
+      android:id="@+id/user_name"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_margin="16dp"
+      android:gravity="center"
+      android:minLines="2"
+      android:text="Иван\nКостылев"
+      android:textColor="?attr/textMain"
+      android:textSize="24sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      />
+
+  <com.google.android.material.imageview.ShapeableImageView
+      android:id="@+id/user_photo"
+      android:layout_width="56dp"
+      android:layout_height="56dp"
+      android:layout_marginTop="16dp"
+      android:layout_marginEnd="16dp"
+      android:src="@color/dark_grey"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:shapeAppearance="@style/roundedImageViewRounded"
+      app:strokeColor="?attr/line"
+      app:strokeWidth="1dp"
+      />
+
+  <com.vk59.gotuda.design.ButtonComponent
+      android:id="@+id/edit_button"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginTop="16dp"
+      android:paddingVertical="16dp"
+      app:component_background="@color/dark_grey"
+      app:component_title="Редактировать"
+      app:component_text_color="?attr/textOnControlMain"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/user_name"
+      tools:background="green"
+      />
+
+<!--  TODO: Use recycler view -->
+  <TextView
+      android:id="@+id/statistics_title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginTop="20dp"
+      android:gravity="start"
+      android:text="Статистика"
+      android:textColor="?attr/textMain"
+      android:textSize="20sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/edit_button"
+      />
+
+  <View
+      android:id="@+id/separator1"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginTop="8dp"
+      android:background="?attr/line"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/statistics_title"
+      />
+
+  <com.vk59.gotuda.design.ListComponent
+      android:id="@+id/percent"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginTop="10dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/separator1"
+      />
+
+  <com.vk59.gotuda.design.ButtonComponent
+      android:id="@+id/go_back_button"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginBottom="16dp"
+      android:paddingVertical="16dp"
+      app:component_title="На карту"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      tools:background="green"
+      />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

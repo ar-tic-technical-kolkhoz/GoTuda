@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="?attr/bgMinor">
-  <item android:id="@+id/shape">
+  <item>
     <shape android:shape="rectangle">
-      <solid android:color="?attr/controlMain" />
       <corners android:radius="16dp" />
     </shape>
   </item>

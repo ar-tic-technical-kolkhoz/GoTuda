@@ -18,7 +18,9 @@
     <item name="bgMinor">@color/black</item>
     <item name="textMain">@color/black</item>
     <item name="controlMain">@color/green</item>
+    <item name="controlMinor">@color/dark_grey</item>
     <item name="textOnControlMain">@color/white</item>
+    <item name="textOnControlMinor">@color/white</item>
     <item name="line">@color/light_grey</item>
   </style>
 </resources>

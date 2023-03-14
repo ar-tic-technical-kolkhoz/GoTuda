@@ -1,6 +1,7 @@
 package com.vk59.gotuda.design
 
 import android.content.Context
+import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.vk59.gotuda.R
+import com.vk59.gotuda.core.colorAttr
 import com.vk59.gotuda.databinding.ButtonComponentBinding
 
 class ButtonComponent @JvmOverloads constructor(
@@ -20,8 +22,31 @@ class ButtonComponent @JvmOverloads constructor(
   private val binding: ButtonComponentBinding
 
   init {
+    val a = context.obtainStyledAttributes(attrs, R.styleable.ButtonComponent, defStyleAttr, defStyleRes)
+    val colorAttr = a.getColor(R.styleable.ButtonComponent_component_background, colorAttr(R.attr.controlMain))
+    val title = a.getString(R.styleable.ButtonComponent_component_title)
+    val subtitle = a.getString(R.styleable.ButtonComponent_component_subtitle)
+    val textColor = a.getColor(R.styleable.ButtonComponent_component_text_color, colorAttr(R.attr.textOnControlMain))
+    val titleTextSize = a.getDimension(R.styleable.ButtonComponent_component_title_text_size, 16f)
+    a.recycle()
+
+
     binding = ButtonComponentBinding.inflate(LayoutInflater.from(context), this)
-    background = AppCompatResources.getDrawable(context, R.drawable.button_background)
+    val drawable = AppCompatResources.getDrawable(context, R.drawable.button_background) as? RippleDrawable
+    drawable?.findDrawableByLayerId(R.id.shape)?.apply {
+      this.setTint(colorAttr)
+    }
+    background = drawable
+
+    if (title != null) {
+      setTitle(title)
+    }
+    if (subtitle != null) {
+      setSubtitle(subtitle)
+    }
+    binding.title.setTextColor(textColor)
+    binding.subtitle.setTextColor(textColor)
+    setTitleSizeSp(titleTextSize)
     isClickable = true
   }
 
