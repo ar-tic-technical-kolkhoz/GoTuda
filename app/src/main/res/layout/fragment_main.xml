@@ -46,6 +46,16 @@
         app:layout_constraintStart_toStartOf="parent"
         />
 
+    <com.vk59.gotuda.presentation.place.PlaceCardsLayout
+        android:id="@+id/cards_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/button_list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="gone"
+      />
+
     <com.vk59.gotuda.button_list.ButtonListLayout
         android:id="@+id/button_list"
         android:layout_width="0dp"

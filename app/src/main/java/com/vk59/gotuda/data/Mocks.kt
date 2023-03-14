@@ -13,4 +13,6 @@ object Mocks {
     Chip("1,", "Искусство", false),
     Chip("1,", "Стритарт", true),
   )
+
+  const val DEFAULT_PHOTO_URL = "https://crypto.ru/wp-content/plugins/q-auth/assets/img/default-user.png"
 }

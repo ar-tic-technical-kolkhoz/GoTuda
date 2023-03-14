@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
@@ -23,22 +24,30 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
+import com.vk59.gotuda.core.makeInvisible
+import com.vk59.gotuda.core.makeVisible
+import com.vk59.gotuda.data.Mocks.DEFAULT_PHOTO_URL
 import com.vk59.gotuda.databinding.FragmentMainBinding
 import com.vk59.gotuda.di.SimpleDi.multipleMapDelegate
 import com.vk59.gotuda.map.MultipleMapDelegate
 import com.vk59.gotuda.map.mapkit.YandexMapViewDelegate
 import com.vk59.gotuda.map.osm.OsmMapViewDelegate
 import com.vk59.gotuda.presentation.profile.ProfileFragment
+import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
-import com.vk59.gotuda.presentation.settings.SettingsFragment
+import java.util.LinkedList
 
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
+
+  private val backStack = LinkedList<View>()
+
+  private var currentModalView: View? = null
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -46,13 +55,23 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    val request = Glide.with(requireContext()).load("https://crypto.ru/wp-content/plugins/q-auth/assets/img/default-user.png")
-    request.into(binding.userPhoto)
+    Glide.with(requireContext()).load(DEFAULT_PHOTO_URL)
+      .into(binding.userPhoto)
+    currentModalView = binding.mainBottomButtons.root
     binding.userPhoto.setOnClickListener {
       launchPassport()
     }
     initMap()
+    launchMainButtons()
     launchDebugBottomButtons()
+    val callback: OnBackPressedCallback =
+      object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() = onBackPressed()
+      }
+    requireActivity().onBackPressedDispatcher.addCallback(
+      viewLifecycleOwner,
+      callback
+    )
   }
 
   private fun launchPassport() {
@@ -82,6 +101,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     binding.mapView.onPause()
   }
 
+  fun onBackPressed() {
+    if (backStack.isNotEmpty()) {
+      currentModalView?.makeInvisible()
+      val newView = backStack.pop()
+      newView.makeVisible()
+      currentModalView = newView
+    } else {
+      requireActivity().finish()
+    }
+  }
+
   override fun onStop() {
     binding.mapKit.onStop()
     MapKitFactory.getInstance().onStop()
@@ -106,10 +136,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     viewModel.listenToButtons().observe(viewLifecycleOwner) { buttons ->
       binding.buttonList.addButtons(buttons)
     }
-    configureBottomControls()
   }
 
-  private fun configureBottomControls() {
+  private fun launchMainButtons() {
     binding.mainBottomButtons.settingsButton.setIconResource(R.drawable.ic_settings)
     binding.mainBottomButtons.settingsButton.setOnClickListener {
       launchSettings()
@@ -117,7 +146,19 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     binding.mainBottomButtons.geoButton.setIconResource(R.drawable.ic_geo_arrow)
     binding.mainBottomButtons.goTudaButton.setTitle("Go")
     binding.mainBottomButtons.goTudaButton.setTitleSizeSp(30f)
+    binding.mainBottomButtons.goTudaButton.setOnClickListener {
+      launchCardRecommendations()
+    }
   }
+
+  private fun launchCardRecommendations() {
+    currentModalView?.makeInvisible()
+    backStack.add(binding.mainBottomButtons.root)
+
+    binding.cardsView.makeVisible()
+    currentModalView = binding.cardsView
+  }
+
 
   private fun launchSettings() {
     parentFragmentManager.beginTransaction()
