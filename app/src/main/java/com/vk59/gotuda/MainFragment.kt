@@ -31,7 +31,7 @@ import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
-import com.vk59.gotuda.presentation.SettingsFragment
+import com.vk59.gotuda.presentation.settings.SettingsFragment
 
 
 class MainFragment : Fragment(R.layout.fragment_main) {

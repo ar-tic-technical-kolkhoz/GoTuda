@@ -1,4 +1,4 @@
-package com.vk59.gotuda.presentation
+package com.vk59.gotuda.presentation.settings
 
 import android.os.Bundle
 import android.view.View

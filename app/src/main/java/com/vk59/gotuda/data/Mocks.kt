@@ -1,6 +1,6 @@
 package com.vk59.gotuda.data
 
-import com.vk59.gotuda.presentation.Chip
+import com.vk59.gotuda.presentation.settings.Chip
 
 object Mocks {
 

@@ -1,4 +1,4 @@
-package com.vk59.gotuda.presentation
+package com.vk59.gotuda.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import com.vk59.gotuda.data.Mocks
