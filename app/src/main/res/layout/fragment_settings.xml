@@ -105,6 +105,7 @@
         app:flow_verticalGap="8dp"
         app:flow_verticalStyle="packed"
         app:flow_wrapMode="chain"
+        app:flow_horizontalBias="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
