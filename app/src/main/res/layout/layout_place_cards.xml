@@ -1,41 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     >
 
-  <LinearLayout
+  <com.vk59.gotuda.design.IconButton
+      android:id="@+id/back_button"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      android:background="?attr/bgMain"
-      >
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Place"
-        android:textSize="100sp"
+      app:component_icon="@drawable/ic_back"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
       />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Place"
-        />
+  <com.vk59.gotuda.design.IconButton
+      android:id="@+id/geo_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:component_icon="@drawable/ic_geo_arrow"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Place"
-        />
+  <androidx.cardview.widget.CardView
+      android:id="@+id/place"
+      android:layout_width="0dp"
+      android:layout_height="60dp"
+      android:layout_marginTop="8dp"
+      android:background="?attr/bgMain"
+      android:orientation="horizontal"
+      app:cardCornerRadius="16dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/back_button"
+      />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Place"
-        />
-  </LinearLayout>
+  <com.vk59.gotuda.design.ButtonComponent
+      android:id="@+id/refuse_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:padding="12dp"
+      app:component_background="?attr/controlDanger"
+      app:component_text_title="Не хочу"
+      app:component_title_text_size="18sp"
+      app:layout_constraintEnd_toStartOf="@id/later_button"
+      app:layout_constraintHorizontal_chainStyle="spread"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/place"
+      />
 
-</FrameLayout>
+  <com.vk59.gotuda.design.ButtonComponent
+      android:id="@+id/later_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:padding="12dp"
+      app:component_background="?attr/bgMain"
+      app:component_text_color="?attr/textMain"
+      app:component_text_title="Потом"
+      app:component_title_text_size="18sp"
+      app:layout_constraintEnd_toStartOf="@id/go_button"
+      app:layout_constraintStart_toEndOf="@id/refuse_button"
+      app:layout_constraintTop_toBottomOf="@id/place"
+      />
+
+
+  <com.vk59.gotuda.design.ButtonComponent
+      android:id="@+id/go_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:padding="12dp"
+      app:component_text_title="Go туда"
+      app:component_title_text_size="18sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/later_button"
+      app:layout_constraintTop_toBottomOf="@id/place"
+      />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

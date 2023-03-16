@@ -1,6 +1,7 @@
 package com.vk59.gotuda.design
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -22,6 +23,15 @@ class IconButton @JvmOverloads constructor(
     binding = ButtonIconBinding.inflate(LayoutInflater.from(context), this)
     background = AppCompatResources.getDrawable(context, R.drawable.white_button_bg)
     isClickable = true
+
+    val a = context.obtainStyledAttributes(attrs, R.styleable.IconButton, defStyleAttr, defStyleRes)
+    val icon = a.getDrawable(R.styleable.IconButton_component_icon)
+    a.recycle()
+    setIconResource(icon)
+  }
+
+  fun setIconResource(icon: Drawable?) {
+    binding.icon.setImageDrawable(icon)
   }
 
   fun setIconResource(@DrawableRes icon: Int) {

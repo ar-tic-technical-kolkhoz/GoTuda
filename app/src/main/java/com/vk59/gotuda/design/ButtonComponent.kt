@@ -24,10 +24,13 @@ class ButtonComponent @JvmOverloads constructor(
   init {
     val a = context.obtainStyledAttributes(attrs, R.styleable.ButtonComponent, defStyleAttr, defStyleRes)
     val colorAttr = a.getColor(R.styleable.ButtonComponent_component_background, colorAttr(R.attr.controlMain))
-    val title = a.getString(R.styleable.ButtonComponent_component_title)
-    val subtitle = a.getString(R.styleable.ButtonComponent_component_subtitle)
+    val title = a.getString(R.styleable.ButtonComponent_component_text_title)
+    val subtitle = a.getString(R.styleable.ButtonComponent_component_text_subtitle)
     val textColor = a.getColor(R.styleable.ButtonComponent_component_text_color, colorAttr(R.attr.textOnControlMain))
-    val titleTextSize = a.getDimension(R.styleable.ButtonComponent_component_title_text_size, 16f)
+    val titleTextSize = a.getDimension(
+      R.styleable.ButtonComponent_component_title_text_size,
+      context.resources.getDimension(R.dimen.button_component_text_size_default)
+    )
     a.recycle()
 
 
@@ -46,7 +49,7 @@ class ButtonComponent @JvmOverloads constructor(
     }
     binding.title.setTextColor(textColor)
     binding.subtitle.setTextColor(textColor)
-    setTitleSizeSp(titleTextSize)
+    setTitleSizePx(titleTextSize)
     isClickable = true
   }
 
@@ -57,6 +60,10 @@ class ButtonComponent @JvmOverloads constructor(
   fun setSubtitle(subtitle: CharSequence) {
     binding.subtitle.text = subtitle
     binding.subtitle.isVisible = true
+  }
+
+  fun setTitleSizePx(size: Float) {
+    binding.title.setTextSize(TypedValue.COMPLEX_UNIT_PX, size)
   }
 
   fun setTitleSizeSp(size: Float) {

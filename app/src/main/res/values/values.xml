@@ -4,6 +4,7 @@
   <attr name="bgMinor" format="color" />
   <attr name="controlMain" format="color" />
   <attr name="controlMinor" format="color" />
+  <attr name="controlDanger" format="color" />
 
   <attr name="textMain" format="color" />
   <attr name="textOnControlMain" format="color" />
@@ -15,8 +16,12 @@
   <declare-styleable name="ButtonComponent">
     <attr name="component_background" format="reference" />
     <attr name="component_text_color" format="reference" />
-    <attr name="component_title" format="reference|string" />
-    <attr name="component_subtitle" format="reference|string" />
+    <attr name="component_text_title" format="reference|string" />
+    <attr name="component_text_subtitle" format="reference|string" />
     <attr name="component_title_text_size" format="dimension" />
+  </declare-styleable>
+
+  <declare-styleable name="IconButton">
+    <attr name="component_icon" format="reference" />
   </declare-styleable>
 </resources>

@@ -18,4 +18,8 @@ class PlaceCardsLayout @JvmOverloads constructor(
   init {
     binding = LayoutPlaceCardsBinding.inflate(LayoutInflater.from(context), this, true)
   }
+
+  fun setOnBackButtonClickListener(onBackClick: () -> Unit) {
+    binding.backButton.setOnClickListener { onBackClick.invoke() }
+  }
 }

@@ -23,6 +23,7 @@
     <item name="controlMinor">@color/dark_grey</item>
     <item name="textOnControlMain">@color/white</item>
     <item name="textOnControlMinor">@color/white</item>
+    <item name="controlDanger">@color/orange</item>
     <item name="line">@color/light_grey</item>
   </style>
 </resources>

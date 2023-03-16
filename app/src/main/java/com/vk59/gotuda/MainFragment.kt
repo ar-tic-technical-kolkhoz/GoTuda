@@ -47,9 +47,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
   private val backStack = LinkedList<View>()
 
-  private var currentModalView: View? = null
-
   private val viewModel: MainViewModel by viewModels()
+
+  private var currentModalView: View? = null
 
   private var mapDelegate: MultipleMapDelegate? = null
 
@@ -157,6 +157,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     binding.cardsView.makeVisible()
     currentModalView = binding.cardsView
+    binding.cardsView.setOnBackButtonClickListener { onBackPressed() }
   }
 
 

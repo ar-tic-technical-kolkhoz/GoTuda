@@ -19,7 +19,7 @@ fun View.makeInvisible() {
 
 fun View.makeVisible() {
   alpha = 0.0f
-  translationY = -100f
+  translationY = 100f
   isVisible = true
   isClickable = false
   animate()
