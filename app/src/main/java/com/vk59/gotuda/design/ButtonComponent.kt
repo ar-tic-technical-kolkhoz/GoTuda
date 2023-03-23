@@ -5,6 +5,7 @@ import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
+import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -35,11 +36,7 @@ class ButtonComponent @JvmOverloads constructor(
 
 
     binding = ButtonComponentBinding.inflate(LayoutInflater.from(context), this)
-    val drawable = AppCompatResources.getDrawable(context, R.drawable.button_background) as? RippleDrawable
-    drawable?.findDrawableByLayerId(R.id.shape)?.apply {
-      this.setTint(colorAttr)
-    }
-    background = drawable
+    setBackgroundColor(colorAttr)
 
     if (title != null) {
       setTitle(title)
@@ -64,6 +61,14 @@ class ButtonComponent @JvmOverloads constructor(
 
   fun setTitleSizePx(size: Float) {
     binding.title.setTextSize(TypedValue.COMPLEX_UNIT_PX, size)
+  }
+
+  override fun setBackgroundColor(@ColorInt color: Int) {
+    val drawable = AppCompatResources.getDrawable(context, R.drawable.button_background) as? RippleDrawable
+    drawable?.findDrawableByLayerId(R.id.shape)?.apply {
+      this.setTint(color)
+    }
+    background = drawable
   }
 
   fun setTitleSizeSp(size: Float) {

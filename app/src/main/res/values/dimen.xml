@@ -2,4 +2,6 @@
 <resources>
   <dimen name="margin_border">16dp</dimen>
   <dimen name="button_component_text_size_default">16sp</dimen>
+
+  <dimen name="mu_2">16dp</dimen>
 </resources>
