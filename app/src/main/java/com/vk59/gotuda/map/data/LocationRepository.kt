@@ -23,9 +23,13 @@ class LocationRepository {
     return locationStateFlow.asStateFlow()
   }
 
+  fun obtainLocation(): GoGeoPoint {
+    return locationStateFlow.value
+  }
+
   @RequiresPermission(allOf = [permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION])
   fun forceRequestGeoUpdates(locationManager: LocationManager): GoGeoPoint {
-    val location = locationManager.getLastKnownLocation(GPS_PROVIDER)
+    val location = locationManager.getLastKnownLocation(getBestProvider(locationManager))
     val result = location?.let { GoGeoPoint(location.latitude, location.longitude) } ?: GoGeoPoint(0.0, 0.0)
     locationStateFlow.value = result
     return result
@@ -35,8 +39,8 @@ class LocationRepository {
   private fun requestGeoUpdates(manager: LocationManager) {
     manager.requestLocationUpdates(
       getBestProvider(manager),
-      5000,
-      3f,
+      1000,
+      0.2f,
       onLocationChanged
     )
   }

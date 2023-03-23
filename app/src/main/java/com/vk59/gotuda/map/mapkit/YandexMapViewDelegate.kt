@@ -5,6 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.map.MapViewDelegate
 import com.vk59.gotuda.map.model.GoGeoPoint
+import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
@@ -39,7 +40,11 @@ class YandexMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
   override fun moveToUserLocation(geoPoint: GoGeoPoint) {
     val mapView = map ?: throw IllegalStateException("Necessary to call initMapView previously")
 
-    mapView.map.move(CameraPosition(Point(geoPoint.latitude, geoPoint.longitude), 16f, 0f, 0f))
+    mapView.map.move(
+      CameraPosition(Point(geoPoint.latitude, geoPoint.longitude), 16f, 0f, 0f),
+      Animation(Animation.Type.SMOOTH, 0.3f),
+      null
+    )
   }
 
   override fun addPlacemark(geoPoint: GoGeoPoint, drawableInt: Int) {

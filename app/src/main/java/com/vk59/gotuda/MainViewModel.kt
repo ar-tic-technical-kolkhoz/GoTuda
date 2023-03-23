@@ -34,6 +34,8 @@ class MainViewModel : ViewModel() {
     _mapViewType.value = viewType
   }
 
+  private val move = MutableStateFlow(Move(GoGeoPoint(0.0, 0.0)))
+
   fun listenToButtons(): LiveData<List<ButtonUiModel>> {
     val buttons = listOf(
       ButtonUiModel("osm", "Open Street Map", onClick = { setViewType(OSM) }),
@@ -47,9 +49,20 @@ class MainViewModel : ViewModel() {
   fun listenToUserGeo(locationManager: LocationManager): StateFlow<GoGeoPoint> {
     return locationRepository.listenToLocation(locationManager)
   }
+
+  fun listenToMove(): StateFlow<Move> {
+    return move.asStateFlow()
+  }
+
+  fun moveToUserGeo() {
+    val location = locationRepository.obtainLocation()
+    move.value = Move(location)
+  }
 }
 
 enum class MapViewType {
   OSM,
   MAPKIT
 }
+
+class Move(val goGeoPoint: GoGeoPoint)

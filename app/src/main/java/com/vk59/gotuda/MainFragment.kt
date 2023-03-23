@@ -1,6 +1,7 @@
 package com.vk59.gotuda
 
 import android.Manifest.permission
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
@@ -36,7 +37,6 @@ import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import java.util.LinkedList
 
@@ -53,6 +53,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
   private var mapDelegate: MultipleMapDelegate? = null
 
+  private var followToUserLocation: Boolean = true
+
+  @SuppressLint("ClickableViewAccessibility")
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     Glide.with(requireContext()).load(DEFAULT_PHOTO_URL)
@@ -72,6 +75,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
       viewLifecycleOwner,
       callback
     )
+    binding.mapKit.rootView.setOnTouchListener { v, event ->
+      followToUserLocation = false
+      false
+    }
   }
 
   private fun launchPassport() {
@@ -144,6 +151,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
       launchSettings()
     }
     binding.mainBottomButtons.geoButton.setIconResource(R.drawable.ic_geo_arrow)
+    binding.mainBottomButtons.geoButton.setOnClickListener {
+      viewModel.moveToUserGeo()
+    }
     binding.mainBottomButtons.goTudaButton.setTitle("Go")
     binding.mainBottomButtons.goTudaButton.setTitleSizeSp(30f)
     binding.mainBottomButtons.goTudaButton.setOnClickListener {
@@ -218,9 +228,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
   @RequiresPermission(allOf = [permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION])
   private fun launchObserveGeoUpdates(manager: LocationManager) {
-    lifecycleScope.launch {
+    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
       viewModel.listenToUserGeo(manager).collect {
-        mapDelegate?.moveToUserLocation(it)
+        if (followToUserLocation) {
+          mapDelegate?.moveToUserLocation(it)
+        }
+      }
+    }
+    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+      viewModel.listenToMove().collect {
+        followToUserLocation = true
+        mapDelegate?.moveToUserLocation(it.goGeoPoint)
       }
     }
   }
