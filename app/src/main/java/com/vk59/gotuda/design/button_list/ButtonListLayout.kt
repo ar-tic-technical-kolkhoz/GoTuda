@@ -1,4 +1,4 @@
-package com.vk59.gotuda.button_list
+package com.vk59.gotuda.design.button_list
 
 import android.content.Context
 import android.util.AttributeSet

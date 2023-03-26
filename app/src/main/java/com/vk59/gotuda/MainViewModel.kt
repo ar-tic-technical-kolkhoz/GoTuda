@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
-import com.vk59.gotuda.button_list.ButtonUiModel
+import com.vk59.gotuda.design.button_list.ButtonUiModel
 import com.vk59.gotuda.map.data.LocationRepository
 import com.vk59.gotuda.map.model.GoGeoPoint
 import kotlinx.coroutines.flow.MutableStateFlow

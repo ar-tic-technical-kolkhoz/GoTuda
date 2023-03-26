@@ -1,4 +1,4 @@
-package com.vk59.gotuda.button_list
+package com.vk59.gotuda.design.button_list
 
 import android.annotation.SuppressLint
 import android.view.ViewGroup
@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.vk59.gotuda.R
-import com.vk59.gotuda.button_list.ButtonsAdapter.ButtonVH
+import com.vk59.gotuda.design.button_list.ButtonsAdapter.ButtonVH
 import com.vk59.gotuda.core.colorAttr
 
 class ButtonsAdapter : ListAdapter<ButtonUiModel, ButtonVH>(diffUtilCallback) {
