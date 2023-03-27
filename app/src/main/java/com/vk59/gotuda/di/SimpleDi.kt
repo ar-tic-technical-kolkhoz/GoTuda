@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.map.MultipleMapDelegate
 import com.vk59.gotuda.map.data.MapConfigDataSource
+import com.yandex.mapkit.user_location.UserLocationLayer
 
 @SuppressLint("StaticFieldLeak")
 object SimpleDi {
@@ -14,4 +15,6 @@ object SimpleDi {
   fun multipleMapDelegate(fragment: Fragment): MultipleMapDelegate {
     return MultipleMapDelegate(MapConfigDataSource.obtainMapViewDelegates(fragment))
   }
+
+  var userLocationLayer: UserLocationLayer? = null
 }
