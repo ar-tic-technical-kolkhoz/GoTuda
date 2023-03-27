@@ -64,7 +64,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     binding.userPhoto.setOnClickListener {
       launchPassport()
     }
-    initMap()
     launchMainButtons()
     launchDebugBottomButtons()
     val callback: OnBackPressedCallback =
@@ -92,6 +91,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     MapKitFactory.getInstance().onStart()
     binding.mapKit.onStart()
     super.onStart()
+    initMap()
   }
 
   override fun onResume() {
@@ -122,6 +122,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
   override fun onStop() {
     binding.mapKit.onStop()
     MapKitFactory.getInstance().onStop()
+    mapDelegate?.detach()
+    mapDelegate = null
     super.onStop()
   }
 
@@ -194,6 +196,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
       }
     }
+    viewModel.getPlaces()
+    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+      viewModel.listenToMapObjects().collectLatest {
+        it.forEach { place ->
+          mapDelegate?.addPlacemark(place.geoPoint, R.drawable.ic_place)
+        }
+      }
+    }
   }
 
   @RequiresApi(VERSION_CODES.P)
@@ -251,10 +261,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         is YandexMapViewDelegate -> {
           val mapKit = MapKitFactory.getInstance()
           mapKit.resetLocationManagerToDefault()
-          it.initMapView(binding.mapKit)
+          it.attach(binding.mapKit)
         }
         is OsmMapViewDelegate -> {
-          it.initMapView(binding.mapView)
+          it.attach(binding.mapView)
         }
       }
     }

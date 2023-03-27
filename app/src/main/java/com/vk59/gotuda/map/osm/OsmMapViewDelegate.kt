@@ -1,5 +1,6 @@
 package com.vk59.gotuda.map.osm
 
+import android.content.Context
 import android.preference.PreferenceManager
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -17,11 +18,9 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class OsmMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
 
-  private val fragmentContext = fragment.requireContext()
-
   private var map: MapView? = null
 
-  override fun initMapView(mapView: View) {
+  override fun attach(mapView: View) {
     map = mapView as? MapView? ?: throw IllegalStateException("Incorrect type of MapView ${mapView.javaClass}")
   }
 
@@ -33,10 +32,14 @@ class OsmMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
     val mapView = map ?: throw IllegalStateException("Necessary to call initMapView previously")
     mapView.setTileSource(TileSourceFactory.MAPNIK)
     val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(fragmentContext), mapView)
-    locationOverlay.setPersonIcon(ContextCompat.getDrawable(fragmentContext, drawable.user_geo)?.toBitmap())
-    locationOverlay.setDirectionIcon(ContextCompat.getDrawable(fragmentContext, drawable.user_geo)?.toBitmap())
+    locationOverlay.setPersonIcon(ContextCompat.getDrawable(requireContext(), drawable.user_geo)?.toBitmap())
+    locationOverlay.setDirectionIcon(ContextCompat.getDrawable(requireContext(), drawable.user_geo)?.toBitmap())
     locationOverlay.enableMyLocation()
     mapView.overlays.add(locationOverlay)
+  }
+
+  private fun requireContext(): Context {
+    return fragment.requireContext()
   }
 
   override fun moveToUserLocation(geoPoint: GoGeoPoint) {
@@ -46,6 +49,11 @@ class OsmMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
   }
 
   override fun addPlacemark(geoPoint: GoGeoPoint, drawableInt: Int) {
-    TODO("Not yet implemented")
+
+  }
+
+  override fun detach() {
+    super.detach()
+    map = null
   }
 }

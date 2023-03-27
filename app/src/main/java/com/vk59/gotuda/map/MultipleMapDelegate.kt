@@ -15,4 +15,8 @@ class MultipleMapDelegate(val delegates: List<MapViewDelegate>) {
   fun showUserLocation() {
     delegates.forEach { it.showUserLocation() }
   }
+
+  fun detach() {
+    delegates.forEach { it.detach() }
+  }
 }

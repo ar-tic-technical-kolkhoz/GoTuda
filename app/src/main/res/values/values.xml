@@ -12,6 +12,8 @@
 
   <attr name="line" format="color" />
 
+  <attr name="mapObject" format="color" />
+
   <!-- ButtonComponent attrs -->
   <declare-styleable name="ButtonComponent">
     <attr name="component_background" format="reference" />

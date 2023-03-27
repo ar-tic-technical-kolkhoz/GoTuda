@@ -25,5 +25,6 @@
     <item name="textOnControlMinor">@color/white</item>
     <item name="controlDanger">@color/orange</item>
     <item name="line">@color/light_grey</item>
+    <item name="mapObject">#BDBDBD</item>
   </style>
 </resources>
