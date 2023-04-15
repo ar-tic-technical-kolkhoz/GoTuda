@@ -1,13 +1,16 @@
 package com.vk59.gotuda.map.mapkit
 
 import android.content.res.Configuration
+import android.os.Handler
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
+import com.vk59.gotuda.R
 import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.MapViewDelegate
 import com.vk59.gotuda.map.model.GoGeoPoint
+import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -19,9 +22,15 @@ import com.yandex.mapkit.user_location.UserLocationLayer
 import com.yandex.runtime.image.ImageProvider
 
 class YandexMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
+  
+  private val handler: Handler = SimpleDi.handler
 
   private val userLocationLayer: UserLocationLayer?
     get() = SimpleDi.userLocationLayer
+
+  private var userLocation: MapObjectCollection? = null
+
+  private var userLocationPlacemark: PlacemarkMapObject? = null
 
   private var map: MapView? = null
 
@@ -48,12 +57,20 @@ class YandexMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
     requireUserLocationLayer()
   }
 
-  override fun showUserLocation() {
-    val layer = requireUserLocationLayer()
-    layer.isVisible = true
-    layer.isHeadingEnabled = true
+  override fun updateUserLocation(geoPoint: GoGeoPoint) {
+    val userLocation = requireUserLocationCollection()
+    val newPlacemark = userLocation.addPlacemark(
+      Point(geoPoint.latitude, geoPoint.longitude),
+      ImageProvider.fromBitmap(AppCompatResources.getDrawable(fragmentContext, R.drawable.ic_user_geo)?.toBitmap())
+    )
 
-    layer.setObjectListener(MainUserLocationObjectListener())
+    handler.postDelayed(
+      {
+        userLocationPlacemark?.let { userLocation.remove(it) }
+        userLocationPlacemark = newPlacemark
+      },
+      10L
+    )
   }
 
   private fun requireUserLocationLayer(): UserLocationLayer {
@@ -93,8 +110,12 @@ class YandexMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
     return mapObjects ?: (requireMap().map.mapObjects).addCollection().also { mapObjects = it }
   }
 
+  private fun requireUserLocationCollection(): MapObjectCollection {
+    return userLocation ?: (requireMap().map.mapObjects).addCollection().also { userLocation = it }
+  }
+
   private fun requireMap(): MapView {
-    return map ?: throw IllegalStateException("ecessary to call initMapView previously")
+    return map ?: throw MapNotAttachedToWindowException()
   }
 
   override fun detach() {

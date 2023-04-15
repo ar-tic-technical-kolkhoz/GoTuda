@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.vk59.gotuda.R.drawable
 import com.vk59.gotuda.map.MapViewDelegate
 import com.vk59.gotuda.map.model.GoGeoPoint
+import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -24,12 +25,12 @@ class OsmMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
     map = mapView as? MapView? ?: throw IllegalStateException("Incorrect type of MapView ${mapView.javaClass}")
   }
 
-  override fun showUserLocation() {
+  override fun updateUserLocation(geoPoint: GoGeoPoint) {
     Configuration.getInstance().load(
       fragmentContext.applicationContext,
       PreferenceManager.getDefaultSharedPreferences(fragmentContext.applicationContext)
     )
-    val mapView = map ?: throw IllegalStateException("Necessary to call initMapView previously")
+    val mapView = map ?: throw MapNotAttachedToWindowException()
     mapView.setTileSource(TileSourceFactory.MAPNIK)
     val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(fragmentContext), mapView)
     locationOverlay.setPersonIcon(ContextCompat.getDrawable(requireContext(), drawable.user_geo)?.toBitmap())
@@ -43,7 +44,7 @@ class OsmMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
   }
 
   override fun moveToUserLocation(geoPoint: GoGeoPoint) {
-    val mapView = map ?: throw java.lang.NullPointerException("Necessary to call initMapView previously")
+    val mapView = map ?: throw MapNotAttachedToWindowException()
 
     mapView.controller.animateTo(GeoPoint(geoPoint.latitude, geoPoint.longitude), 18.0, 1000)
   }

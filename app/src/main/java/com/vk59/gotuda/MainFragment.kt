@@ -8,6 +8,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.os.Handler
 import android.preference.PreferenceManager
 import android.view.View
 import android.widget.Toast
@@ -25,19 +26,24 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
-import com.vk59.gotuda.core.makeInvisible
+import com.vk59.gotuda.core.fadeIn
+import com.vk59.gotuda.core.fadeOut
+import com.vk59.gotuda.core.makeGone
 import com.vk59.gotuda.core.makeVisible
 import com.vk59.gotuda.data.Mocks.DEFAULT_PHOTO_URL
 import com.vk59.gotuda.databinding.FragmentMainBinding
+import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.di.SimpleDi.multipleMapDelegate
 import com.vk59.gotuda.map.MultipleMapDelegate
 import com.vk59.gotuda.map.mapkit.YandexMapViewDelegate
+import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.vk59.gotuda.map.osm.OsmMapViewDelegate
 import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.config.Configuration
+import timber.log.Timber
 import java.util.LinkedList
 
 
@@ -54,6 +60,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
   private var mapDelegate: MultipleMapDelegate? = null
 
   private var followToUserLocation: Boolean = true
+
+  private val handler: Handler = SimpleDi.handler
 
   @SuppressLint("ClickableViewAccessibility")
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,10 +83,13 @@ class MainFragment : Fragment(R.layout.fragment_main) {
       callback
     )
     binding.mapKit.rootView.setOnTouchListener { v, event ->
+      val geoButton = binding.mainBottomButtons.geoButton
+      if (!geoButton.isVisible) {
+        binding.mainBottomButtons.geoButton.fadeIn()
+      }
       followToUserLocation = false
       false
     }
-    initMap()
   }
 
   private fun launchPassport() {
@@ -97,6 +108,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
   override fun onResume() {
     super.onResume()
     binding.mapView.onResume()
+    initMap()
+
+    viewModel.getPlaces()
+    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+      viewModel.listenToMapObjects().collectLatest {
+        it.forEach { place ->
+          mapDelegate?.addPlacemark(place.geoPoint, R.drawable.ic_place)
+        }
+      }
+    }
+    val locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java) ?: return
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
+      initLocationManager(locationManager)
+    } else {
+      initLocationManagerLessP(locationManager)
+    }
   }
 
   override fun onPause() {
@@ -110,7 +137,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
   fun onBackPressed() {
     if (backStack.isNotEmpty()) {
-      currentModalView?.makeInvisible()
+      currentModalView?.makeGone()
       val newView = backStack.pop()
       newView.makeVisible()
       currentModalView = newView
@@ -155,6 +182,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     binding.mainBottomButtons.geoButton.setIconResource(R.drawable.ic_geo_arrow)
     binding.mainBottomButtons.geoButton.setOnClickListener {
       viewModel.moveToUserGeo()
+      handler.postDelayed(
+        {
+          binding.mainBottomButtons.geoButton.fadeOut(to = View.INVISIBLE)
+        },
+        500L
+      )
     }
     binding.mainBottomButtons.goTudaButton.setTitle("Go")
     binding.mainBottomButtons.goTudaButton.setTitleSizeSp(30f)
@@ -164,7 +197,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
   }
 
   private fun launchCardRecommendations() {
-    currentModalView?.makeInvisible()
+    currentModalView?.makeGone()
     backStack.add(binding.mainBottomButtons.root)
 
     binding.cardsView.makeVisible()
@@ -193,14 +226,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
           binding.mapView.isVisible = false
         }
         else -> { /* Nothing to do */
-        }
-      }
-    }
-    viewModel.getPlaces()
-    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-      viewModel.listenToMapObjects().collectLatest {
-        it.forEach { place ->
-          mapDelegate?.addPlacemark(place.geoPoint, R.drawable.ic_place)
         }
       }
     }
@@ -241,21 +266,26 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
       viewModel.listenToUserGeo(manager).collect {
         if (followToUserLocation) {
-          mapDelegate?.moveToUserLocation(it)
+          try {
+            requireMapDelegate().moveToUserLocation(it)
+            requireMapDelegate().showUserLocation(it)
+          } catch (e: java.lang.IllegalStateException) {
+            Timber.d(e)
+          } catch (mapNotAttached: MapNotAttachedToWindowException) {
+            Timber.d(mapNotAttached)
+          }
         }
       }
     }
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
       viewModel.listenToMove().collect {
         followToUserLocation = true
-        mapDelegate?.moveToUserLocation(it.goGeoPoint)
+        requireMapDelegate().moveToUserLocation(it.goGeoPoint)
       }
     }
   }
 
   private fun initAllMaps() {
-    val locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java) ?: return
-
     requireMapDelegate().delegates.forEach {
       when (it) {
         is YandexMapViewDelegate -> {
@@ -268,12 +298,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
       }
     }
-    if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
-      initLocationManager(locationManager)
-    } else {
-      initLocationManagerLessP(locationManager)
-    }
-    requireMapDelegate().showUserLocation()
   }
 
   private fun requireMapDelegate(): MultipleMapDelegate {

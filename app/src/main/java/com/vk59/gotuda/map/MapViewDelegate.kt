@@ -20,7 +20,7 @@ abstract class MapViewDelegate(private var _fragment: Fragment? = null) {
 
   abstract fun addPlacemark(geoPoint: GoGeoPoint, @DrawableRes drawableInt: Int)
 
-  abstract fun showUserLocation()
+  abstract fun updateUserLocation(geoPoint: GoGeoPoint)
 
   open fun detach() {
     _fragment = null

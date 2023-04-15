@@ -2,6 +2,8 @@ package com.vk59.gotuda.di
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.map.MultipleMapDelegate
 import com.vk59.gotuda.map.data.MapConfigDataSource
@@ -17,4 +19,8 @@ object SimpleDi {
   }
 
   var userLocationLayer: UserLocationLayer? = null
+
+  val handler: Handler by lazy {
+    Handler(Looper.getMainLooper())
+  }
 }

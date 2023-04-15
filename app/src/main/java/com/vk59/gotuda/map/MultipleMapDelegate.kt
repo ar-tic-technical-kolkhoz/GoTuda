@@ -12,8 +12,8 @@ class MultipleMapDelegate(val delegates: List<MapViewDelegate>) {
     delegates.forEach { it.addPlacemark(geoPoint, drawableInt) }
   }
 
-  fun showUserLocation() {
-    delegates.forEach { it.showUserLocation() }
+  fun showUserLocation(geoPoint: GoGeoPoint) {
+    delegates.forEach { it.updateUserLocation(geoPoint) }
   }
 
   fun detach() {
