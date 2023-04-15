@@ -9,12 +9,10 @@ import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.MapViewDelegate
 import com.vk59.gotuda.map.model.GoGeoPoint
 import com.yandex.mapkit.Animation
-import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.MapObjectCollection
-import com.yandex.mapkit.map.MapWindow
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
@@ -47,22 +45,22 @@ class YandexMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
           "}" +
           "]"
     )
-    requireUserLocationLayer(MapKitFactory.getInstance(), mapView.mapWindow)
+    requireUserLocationLayer()
   }
 
   override fun showUserLocation() {
-    val mapView = requireMap()
-    val mapKit = MapKitFactory.getInstance()
-    val layer = userLocationLayer ?: throw IllegalStateException()
+    val layer = requireUserLocationLayer()
     layer.isVisible = true
     layer.isHeadingEnabled = true
 
     layer.setObjectListener(MainUserLocationObjectListener())
   }
 
-  private fun requireUserLocationLayer(mapKit: MapKit, mapWindow: MapWindow): UserLocationLayer {
+  private fun requireUserLocationLayer(): UserLocationLayer {
+    val mapWindow = requireMap().mapWindow
+    val mapKit = MapKitFactory.getInstance()
     val layer = userLocationLayer
-    return if (layer != null) {
+    return if (layer != null && layer.isValid) {
       layer
     } else {
       mapKit.resetLocationManagerToDefault()

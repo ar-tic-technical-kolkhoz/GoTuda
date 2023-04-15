@@ -78,6 +78,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
       followToUserLocation = false
       false
     }
+    initMap()
   }
 
   private fun launchPassport() {
@@ -91,7 +92,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     MapKitFactory.getInstance().onStart()
     binding.mapKit.onStart()
     super.onStart()
-    initMap()
   }
 
   override fun onResume() {
