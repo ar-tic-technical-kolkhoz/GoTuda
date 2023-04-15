@@ -33,11 +33,9 @@ import com.vk59.gotuda.core.makeVisible
 import com.vk59.gotuda.data.Mocks.DEFAULT_PHOTO_URL
 import com.vk59.gotuda.databinding.FragmentMainBinding
 import com.vk59.gotuda.di.SimpleDi
-import com.vk59.gotuda.di.SimpleDi.multipleMapDelegate
-import com.vk59.gotuda.map.MultipleMapDelegate
-import com.vk59.gotuda.map.mapkit.YandexMapViewDelegate
+import com.vk59.gotuda.di.SimpleDi.mapController
+import com.vk59.gotuda.map.MapController
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
-import com.vk59.gotuda.map.osm.OsmMapViewDelegate
 import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
@@ -65,7 +63,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
 
   private var currentModalView: View? = null
 
-  private var mapDelegate: MultipleMapDelegate? = null
+  private var mapDelegate: MapController? = null
 
   private var followToUserLocation: Boolean = true
 
@@ -297,22 +295,11 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
   }
 
   private fun initAllMaps() {
-    requireMapDelegate().delegates.forEach {
-      when (it) {
-        is YandexMapViewDelegate -> {
-          val mapKit = MapKitFactory.getInstance()
-          mapKit.resetLocationManagerToDefault()
-          it.attach(binding.mapKit)
-        }
-        is OsmMapViewDelegate -> {
-          it.attach(binding.mapView)
-        }
-      }
-    }
+    requireMapDelegate().attachViews(this, listOf(binding.mapKit, binding.mapView))
   }
 
-  private fun requireMapDelegate(): MultipleMapDelegate {
-    return mapDelegate ?: multipleMapDelegate(this).also { mapDelegate = it }
+  private fun requireMapDelegate(): MapController {
+    return mapDelegate ?: mapController.also { mapDelegate = it }
   }
 
   companion object {

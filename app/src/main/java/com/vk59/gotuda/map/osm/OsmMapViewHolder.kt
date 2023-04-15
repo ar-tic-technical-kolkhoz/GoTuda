@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.R.drawable
-import com.vk59.gotuda.map.MapViewDelegate
+import com.vk59.gotuda.map.MapViewHolder
 import com.vk59.gotuda.map.model.GoGeoPoint
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import org.osmdroid.config.Configuration
@@ -16,8 +16,9 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.lang.ref.WeakReference
 
-class OsmMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
+class OsmMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fragment) {
 
   private var map: MapView? = null
 

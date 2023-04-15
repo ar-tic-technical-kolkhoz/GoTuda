@@ -8,7 +8,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.R
 import com.vk59.gotuda.di.SimpleDi
-import com.vk59.gotuda.map.MapViewDelegate
+import com.vk59.gotuda.map.MapViewHolder
 import com.vk59.gotuda.map.model.GoGeoPoint
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.yandex.mapkit.Animation
@@ -20,8 +20,9 @@ import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
 import com.yandex.runtime.image.ImageProvider
+import java.lang.ref.WeakReference
 
-class YandexMapViewDelegate(fragment: Fragment) : MapViewDelegate(fragment) {
+class YandexMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fragment) {
   
   private val handler: Handler = SimpleDi.handler
 

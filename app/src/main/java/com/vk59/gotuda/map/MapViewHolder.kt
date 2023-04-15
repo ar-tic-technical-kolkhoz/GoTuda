@@ -5,11 +5,12 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.map.model.GoGeoPoint
+import java.lang.ref.WeakReference
 
-abstract class MapViewDelegate(private var _fragment: Fragment? = null) {
+abstract class MapViewHolder(private var _fragment: WeakReference<Fragment>) {
 
   protected val fragment: Fragment
-    get() = _fragment ?: throw IllegalStateException("Fragment is not attached")
+    get() = _fragment.get() ?: throw IllegalStateException("Fragment is not attached")
 
   protected val fragmentContext: Context
     get() = fragment.requireContext()
@@ -23,6 +24,6 @@ abstract class MapViewDelegate(private var _fragment: Fragment? = null) {
   abstract fun updateUserLocation(geoPoint: GoGeoPoint)
 
   open fun detach() {
-    _fragment = null
+    _fragment.clear()
   }
 }
