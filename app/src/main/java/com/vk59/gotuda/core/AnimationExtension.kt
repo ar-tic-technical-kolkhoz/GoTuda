@@ -9,12 +9,14 @@ import android.view.View
  * example: View.INVISIBLE or View.GONE
  */
 fun View.fadeOut(to: Int = View.GONE) {
+  isClickable = false
   animate()
     .alpha(0.0f)
     .setListener(object : AnimatorListenerAdapter() {
       override fun onAnimationEnd(animation: Animator) {
         super.onAnimationEnd(animation)
         visibility = to
+        isClickable = true
       }
     })
 }
@@ -34,6 +36,7 @@ fun View.fadeIn() {
 }
 
 fun View.makeGone() {
+  isClickable = false
   animate()
     .alpha(0.0f)
     .translationY(100f)
@@ -41,6 +44,7 @@ fun View.makeGone() {
       override fun onAnimationEnd(animation: Animator) {
         super.onAnimationEnd(animation)
         visibility = View.GONE
+        isClickable = true
       }
     })
 }

@@ -41,13 +41,18 @@ import com.vk59.gotuda.map.osm.OsmMapViewDelegate
 import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.map.CameraListener
+import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.CameraUpdateReason
+import com.yandex.mapkit.map.CameraUpdateReason.GESTURES
+import com.yandex.mapkit.map.Map
 import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.config.Configuration
 import timber.log.Timber
 import java.util.LinkedList
 
 
-class MainFragment : Fragment(R.layout.fragment_main) {
+class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
 
@@ -82,14 +87,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
       viewLifecycleOwner,
       callback
     )
-    binding.mapKit.rootView.setOnTouchListener { v, event ->
-      val geoButton = binding.mainBottomButtons.geoButton
-      if (!geoButton.isVisible) {
-        binding.mainBottomButtons.geoButton.fadeIn()
-      }
-      followToUserLocation = false
-      false
-    }
   }
 
   private fun launchPassport() {
@@ -99,10 +96,18 @@ class MainFragment : Fragment(R.layout.fragment_main) {
       .commit()
   }
 
+  private fun launchSettings() {
+    parentFragmentManager.beginTransaction()
+      .replace(R.id.fragment_container, SettingsFragment())
+      .addToBackStack("main")
+      .commit()
+  }
+
   override fun onStart() {
     MapKitFactory.getInstance().onStart()
     binding.mapKit.onStart()
     super.onStart()
+    binding.mapKit.map.addCameraListener(this)
   }
 
   override fun onResume() {
@@ -123,6 +128,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
       initLocationManager(locationManager)
     } else {
       initLocationManagerLessP(locationManager)
+    }
+  }
+
+  override fun onCameraPositionChanged(map: Map, pos: CameraPosition, reason: CameraUpdateReason, finished: Boolean) {
+    if (reason == GESTURES) {
+      followToUserLocation = false
+      val geoButton = binding.mainBottomButtons.geoButton
+      if (geoButton.visibility != View.VISIBLE) {
+        binding.mainBottomButtons.geoButton.fadeIn()
+      }
     }
   }
 
@@ -151,6 +166,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     MapKitFactory.getInstance().onStop()
     mapDelegate?.detach()
     mapDelegate = null
+    binding.mapKit.map.addCameraListener(this)
     super.onStop()
   }
 
@@ -203,14 +219,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     binding.cardsView.makeVisible()
     currentModalView = binding.cardsView
     binding.cardsView.setOnBackButtonClickListener { onBackPressed() }
-  }
-
-
-  private fun launchSettings() {
-    parentFragmentManager.beginTransaction()
-      .replace(R.id.fragment_container, SettingsFragment())
-      .addToBackStack("main")
-      .commit()
   }
 
   private fun initMap() {
