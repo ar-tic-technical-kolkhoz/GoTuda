@@ -51,7 +51,10 @@ import org.osmdroid.config.Configuration
 import timber.log.Timber
 import java.util.LinkedList
 
-
+// TODO: Make it initializing Fragment.
+/**
+ * The MainFragment must initialize all the required components only
+ */
 class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
