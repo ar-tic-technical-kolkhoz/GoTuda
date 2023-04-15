@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.vk59.gotuda.map.MapController
+import com.vk59.gotuda.map.data.LastKnownLocationRepository
 import com.yandex.mapkit.user_location.UserLocationLayer
 
 @SuppressLint("StaticFieldLeak")
@@ -16,6 +17,10 @@ object SimpleDi {
 
   val mapController: MapController by lazy {
     MapController()
+  }
+
+  val lastKnownLocationRepository: LastKnownLocationRepository by lazy {
+    LastKnownLocationRepository(context)
   }
 
   val handler: Handler by lazy {

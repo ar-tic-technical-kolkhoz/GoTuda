@@ -1,7 +1,7 @@
 package com.vk59.gotuda.data
 
 import com.vk59.gotuda.data.model.PlaceDto
-import com.vk59.gotuda.map.model.GoGeoPoint
+import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.presentation.model.Place
 import com.vk59.gotuda.presentation.profile.ProfileListItem
 import com.vk59.gotuda.presentation.profile.ProfileListItem.Button
@@ -54,10 +54,10 @@ object Mocks {
   )
 
   val placeDtos = listOf(
-    PlaceDto("1", GoGeoPoint(59.9596, 30.406043)),
-    PlaceDto("2", GoGeoPoint(59.95916, 30.40609)),
-    PlaceDto("3", GoGeoPoint(59.961103, 30.4069)),
-    PlaceDto("4", GoGeoPoint(59.962986, 30.404977)),
-    PlaceDto("5", GoGeoPoint(59.960530, 30.400957)),
+    PlaceDto("1", MyGeoPoint(59.9596, 30.406043)),
+    PlaceDto("2", MyGeoPoint(59.95916, 30.40609)),
+    PlaceDto("3", MyGeoPoint(59.961103, 30.4069)),
+    PlaceDto("4", MyGeoPoint(59.962986, 30.404977)),
+    PlaceDto("5", MyGeoPoint(59.960530, 30.400957)),
   )
 }

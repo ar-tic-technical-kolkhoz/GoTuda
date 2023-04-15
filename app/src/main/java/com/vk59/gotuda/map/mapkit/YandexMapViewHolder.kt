@@ -9,8 +9,8 @@ import androidx.fragment.app.Fragment
 import com.vk59.gotuda.R
 import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.MapViewHolder
-import com.vk59.gotuda.map.model.GoGeoPoint
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
+import com.vk59.gotuda.map.model.MyGeoPoint
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -22,8 +22,11 @@ import com.yandex.mapkit.user_location.UserLocationLayer
 import com.yandex.runtime.image.ImageProvider
 import java.lang.ref.WeakReference
 
-class YandexMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fragment) {
-  
+class YandexMapViewHolder(
+  fragment: WeakReference<Fragment>,
+  private val initialGeoPoint: MyGeoPoint?
+) : MapViewHolder(fragment) {
+
   private val handler: Handler = SimpleDi.handler
 
   private val userLocationLayer: UserLocationLayer?
@@ -56,9 +59,13 @@ class YandexMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fra
           "]"
     )
     requireUserLocationLayer()
+    initialGeoPoint?.let {
+      updateUserLocation(it)
+      realMoveToUserLocation(it, animating = false)
+    }
   }
 
-  override fun updateUserLocation(geoPoint: GoGeoPoint) {
+  override fun updateUserLocation(geoPoint: MyGeoPoint) {
     val userLocation = requireUserLocationCollection()
     val newPlacemark = userLocation.addPlacemark(
       Point(geoPoint.latitude, geoPoint.longitude),
@@ -88,17 +95,25 @@ class YandexMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fra
     }
   }
 
-  override fun moveToUserLocation(geoPoint: GoGeoPoint) {
-    val mapView = requireMap()
-
-    mapView.map.move(
-      CameraPosition(Point(geoPoint.latitude, geoPoint.longitude), 16f, 0f, 0f),
-      Animation(Animation.Type.SMOOTH, 0.3f),
-      null
-    )
+  override fun moveToUserLocation(geoPoint: MyGeoPoint) {
+    realMoveToUserLocation(geoPoint, animating = true)
   }
 
-  override fun addPlacemark(geoPoint: GoGeoPoint, drawableInt: Int) {
+  private fun realMoveToUserLocation(geoPoint: MyGeoPoint, animating: Boolean) {
+    val mapView = requireMap()
+
+    if (animating) {
+      mapView.map.move(
+        CameraPosition(Point(geoPoint.latitude, geoPoint.longitude), DEFAULT_ZOOM, 0f, 0f),
+        Animation(Animation.Type.SMOOTH, 0.3f),
+        null
+      )
+    } else {
+      mapView.map.move(CameraPosition(Point(geoPoint.latitude, geoPoint.longitude), DEFAULT_ZOOM, 0f, 0f))
+    }
+  }
+
+  override fun addPlacemark(geoPoint: MyGeoPoint, drawableInt: Int) {
     placeMarks.add(
       requireMapObjectsCollection().addPlacemark(
         Point(geoPoint.latitude, geoPoint.longitude),
@@ -125,5 +140,10 @@ class YandexMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fra
     placeMarks.clear()
     map = null
     mapObjects = null
+  }
+
+  companion object {
+
+    private const val DEFAULT_ZOOM = 17F
   }
 }

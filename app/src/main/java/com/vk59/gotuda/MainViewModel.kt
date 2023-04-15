@@ -12,8 +12,11 @@ import com.vk59.gotuda.MapViewType.OSM
 import com.vk59.gotuda.data.PlacesRepository
 import com.vk59.gotuda.data.model.PlaceDto
 import com.vk59.gotuda.design.button_list.ButtonUiModel
+import com.vk59.gotuda.di.SimpleDi
+import com.vk59.gotuda.map.data.LastKnownLocationRepository
 import com.vk59.gotuda.map.data.LocationRepository
-import com.vk59.gotuda.map.model.GoGeoPoint
+import com.vk59.gotuda.map.model.MyGeoPoint
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,15 +37,13 @@ class MainViewModel : ViewModel() {
 
   private val _debugButtonsShown = MutableStateFlow(BuildConfig.DEBUG)
 
-  private fun setViewType(viewType: MapViewType) {
-    _mapViewType.value = viewType
-  }
+  private val lastKnownLocationRepository: LastKnownLocationRepository = SimpleDi.lastKnownLocationRepository
 
   private val placesRepository = PlacesRepository()
 
   private val mapObjectsFlow = MutableStateFlow<List<PlaceDto>>(emptyList())
 
-  private val move = MutableStateFlow(Move(GoGeoPoint(0.0, 0.0)))
+  private val move = MutableStateFlow(Move(MyGeoPoint(0.0, 0.0)))
 
   fun listenToButtons(): LiveData<List<ButtonUiModel>> {
     val buttons = listOf(
@@ -54,7 +55,7 @@ class MainViewModel : ViewModel() {
   }
 
   @RequiresPermission(allOf = [permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION])
-  fun listenToUserGeo(locationManager: LocationManager): StateFlow<GoGeoPoint> {
+  fun listenToUserGeo(locationManager: LocationManager): Flow<MyGeoPoint> {
     return locationRepository.listenToLocation(locationManager)
   }
 
@@ -73,8 +74,16 @@ class MainViewModel : ViewModel() {
   }
 
   fun moveToUserGeo() {
-    val location = locationRepository.obtainLocation()
+    val location = locationRepository.obtainLocation() ?: return
     move.value = Move(location)
+  }
+
+  suspend fun obtainInitialLocation(): MyGeoPoint? {
+    return lastKnownLocationRepository.getLastKnownLocation()
+  }
+
+  private fun setViewType(viewType: MapViewType) {
+    _mapViewType.value = viewType
   }
 }
 
@@ -83,4 +92,4 @@ enum class MapViewType {
   MAPKIT
 }
 
-class Move(val goGeoPoint: GoGeoPoint)
+class Move(val geoPoint: MyGeoPoint)

@@ -36,6 +36,7 @@ import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.di.SimpleDi.mapController
 import com.vk59.gotuda.map.MapController
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
+import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
@@ -114,7 +115,9 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
   override fun onResume() {
     super.onResume()
     binding.mapView.onResume()
-    initMap()
+    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+      initMap(viewModel.obtainInitialLocation())
+    }
 
     viewModel.getPlaces()
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
@@ -222,8 +225,8 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
     binding.cardsView.setOnBackButtonClickListener { onBackPressed() }
   }
 
-  private fun initMap() {
-    initAllMaps()
+  private fun initMap(initialGeoPoint: MyGeoPoint?) {
+    requireMapDelegate().attachViews(this, listOf(binding.mapKit, binding.mapView), initialGeoPoint)
     viewModel.mapViewType.observe(viewLifecycleOwner) { mapType ->
       when (mapType) {
         OSM -> {
@@ -289,13 +292,9 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
       viewModel.listenToMove().collect {
         followToUserLocation = true
-        requireMapDelegate().moveToUserLocation(it.goGeoPoint)
+        requireMapDelegate().moveToUserLocation(it.geoPoint)
       }
     }
-  }
-
-  private fun initAllMaps() {
-    requireMapDelegate().attachViews(this, listOf(binding.mapKit, binding.mapView))
   }
 
   private fun requireMapDelegate(): MapController {

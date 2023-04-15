@@ -8,8 +8,8 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.R.drawable
 import com.vk59.gotuda.map.MapViewHolder
-import com.vk59.gotuda.map.model.GoGeoPoint
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
+import com.vk59.gotuda.map.model.MyGeoPoint
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -26,7 +26,7 @@ class OsmMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fragme
     map = mapView as? MapView? ?: throw IllegalStateException("Incorrect type of MapView ${mapView.javaClass}")
   }
 
-  override fun updateUserLocation(geoPoint: GoGeoPoint) {
+  override fun updateUserLocation(geoPoint: MyGeoPoint) {
     Configuration.getInstance().load(
       fragmentContext.applicationContext,
       PreferenceManager.getDefaultSharedPreferences(fragmentContext.applicationContext)
@@ -44,13 +44,13 @@ class OsmMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fragme
     return fragment.requireContext()
   }
 
-  override fun moveToUserLocation(geoPoint: GoGeoPoint) {
+  override fun moveToUserLocation(geoPoint: MyGeoPoint) {
     val mapView = map ?: throw MapNotAttachedToWindowException()
 
     mapView.controller.animateTo(GeoPoint(geoPoint.latitude, geoPoint.longitude), 18.0, 1000)
   }
 
-  override fun addPlacemark(geoPoint: GoGeoPoint, drawableInt: Int) {
+  override fun addPlacemark(geoPoint: MyGeoPoint, drawableInt: Int) {
 
   }
 
