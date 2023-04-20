@@ -24,11 +24,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
-import com.vk59.gotuda.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.MainFragmentState.ErrorState
+import com.vk59.gotuda.MainFragmentState.FinishActivity
+import com.vk59.gotuda.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.MainFragmentState.Main
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
+import com.vk59.gotuda.core.commitWithAnimation
 import com.vk59.gotuda.core.fadeIn
 import com.vk59.gotuda.core.fadeOut
 import com.vk59.gotuda.core.makeGone
@@ -55,7 +57,6 @@ import com.yandex.mapkit.map.Map
 import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.config.Configuration
 import timber.log.Timber
-import java.util.LinkedList
 
 // TODO: Make it initializing Fragment.
 /**
@@ -64,8 +65,6 @@ import java.util.LinkedList
 class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapActionsListener {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
-
-  private val backStack = LinkedList<View>()
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -90,7 +89,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     launchDebugBottomButtons()
     val callback: OnBackPressedCallback =
       object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() = onBackPressed()
+        override fun handleOnBackPressed() = viewModel.backPressed()
       }
     requireActivity().onBackPressedDispatcher.addCallback(
       viewLifecycleOwner,
@@ -99,17 +98,17 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   }
 
   private fun launchPassport() {
-    parentFragmentManager.beginTransaction()
-      .replace(R.id.fragment_container, ProfileFragment())
-      .addToBackStack("main")
-      .commit()
+    parentFragmentManager.commitWithAnimation {
+      replace(R.id.fragment_container, ProfileFragment())
+      addToBackStack("main")
+    }
   }
 
   private fun launchSettings() {
-    parentFragmentManager.beginTransaction()
-      .replace(R.id.fragment_container, SettingsFragment())
-      .addToBackStack("main")
-      .commit()
+    parentFragmentManager.commitWithAnimation {
+      replace(R.id.fragment_container, SettingsFragment())
+      addToBackStack("main")
+    }
   }
 
   override fun onStart() {
@@ -136,9 +135,12 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
       viewModel.listenToFragmentState().collectLatest { state ->
         when (state) {
-          Main -> launchMain()
+          Main -> launchMainButtons()
           is LaunchPlace -> launchCardRecommendations(state.place)
           is ErrorState -> { /* TODO*/
+          }
+          FinishActivity -> {
+            requireActivity().finish()
           }
         }
       }
@@ -149,12 +151,6 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
       initLocationManager(locationManager)
     } else {
       initLocationManagerLessP(locationManager)
-    }
-  }
-
-  private fun launchMain() {
-    while (backStack.isNotEmpty()) {
-      onBackPressed()
     }
   }
 
@@ -180,17 +176,6 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
       PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
     )
     binding.mapView.onPause()
-  }
-
-  fun onBackPressed() {
-    if (backStack.isNotEmpty()) {
-      currentModalView?.makeGone()
-      val newView = backStack.pop()
-      newView.makeVisible()
-      currentModalView = newView
-    } else {
-      requireActivity().finish()
-    }
   }
 
   override fun onStop() {
@@ -223,6 +208,10 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   }
 
   private fun launchMainButtons() {
+    currentModalView?.makeGone()
+
+    binding.mainBottomButtons.root.makeVisible()
+    currentModalView = binding.mainBottomButtons.root
     binding.mainBottomButtons.settingsButton.setIconResource(R.drawable.ic_settings)
     binding.mainBottomButtons.settingsButton.setOnClickListener {
       launchSettings()
@@ -248,14 +237,13 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   private fun launchCardRecommendations(place: PlaceToVisit) {
     currentModalView?.makeGone()
-    backStack.add(binding.mainBottomButtons.root)
 
     binding.cardsView.makeVisible()
     binding.cardsView.bindPlace(place)
     currentModalView = binding.cardsView
     binding.cardsView.setOnBackButtonClickListener {
       viewModel.deselectObject()
-      onBackPressed()
+      viewModel.backPressed()
     }
   }
 

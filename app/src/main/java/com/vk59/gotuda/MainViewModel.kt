@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vk59.gotuda.MainFragmentState.ErrorState
+import com.vk59.gotuda.MainFragmentState.FinishActivity
 import com.vk59.gotuda.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.MainFragmentState.Main
 import com.vk59.gotuda.MapViewType.MAPKIT
@@ -57,6 +58,13 @@ class MainViewModel : ViewModel() {
       ButtonUiModel("showButtons", "Buttons show", onClick = { _debugButtonsShown.value = !debugButtonsShown.value })
     )
     return MutableLiveData(buttons)
+  }
+
+  fun backPressed() {
+    state.value = when(state.value) {
+      is LaunchPlace -> Main
+      else -> FinishActivity
+    }
   }
 
   @RequiresPermission(allOf = [permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION])
@@ -140,6 +148,8 @@ enum class MapViewType {
 class Move(val geoPoint: MyGeoPoint)
 
 sealed interface MainFragmentState {
+
+  object FinishActivity : MainFragmentState
 
   object Main : MainFragmentState
 

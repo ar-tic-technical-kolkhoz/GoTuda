@@ -3,6 +3,10 @@ package com.vk59.gotuda.core
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.commit
+import com.vk59.gotuda.R
 
 /**
  * @param to - Visibility state view moving to
@@ -63,4 +67,14 @@ fun View.makeVisible() {
         isClickable = true
       }
     })
+}
+
+inline fun FragmentManager.commitWithAnimation(
+  allowStateLoss: Boolean = false,
+  body: FragmentTransaction.() -> Unit
+) {
+  commit(allowStateLoss) {
+    setCustomAnimations(R.anim.slide_in, R.anim.slide_out)
+    body.invoke(this)
+  }
 }
