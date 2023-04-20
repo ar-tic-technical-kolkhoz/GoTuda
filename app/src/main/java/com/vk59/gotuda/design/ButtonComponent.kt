@@ -5,6 +5,7 @@ import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -73,5 +74,17 @@ class ButtonComponent @JvmOverloads constructor(
 
   fun setTitleSizeSp(size: Float) {
     binding.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
+  }
+
+  fun setProgressing(progressing: Boolean) {
+    if (progressing) {
+      binding.title.visibility = View.GONE
+      binding.subtitle.visibility = View.GONE
+      binding.progressIndicator.visibility = View.VISIBLE
+    } else {
+      binding.title.visibility = View.VISIBLE
+      binding.subtitle.visibility = if (binding.subtitle.text.isNullOrBlank()) View.GONE else View.VISIBLE
+      binding.progressIndicator.visibility = View.GONE
+    }
   }
 }

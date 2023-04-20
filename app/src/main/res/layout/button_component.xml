@@ -17,10 +17,10 @@
       android:textColor="?attr/textOnControlMain"
       android:textSize="16sp"
       android:textStyle="bold"
+      app:layout_constraintBottom_toTopOf="@id/subtitle"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintBottom_toTopOf="@id/subtitle"
       tools:text="Title"
       tools:textColor="@color/black"
       />
@@ -31,11 +31,24 @@
       android:layout_height="wrap_content"
       android:textSize="13sp"
       android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@id/title"
-      app:layout_constraintBottom_toBottomOf="parent"
       tools:text="Subtitle"
+      />
+
+  <com.google.android.material.progressindicator.CircularProgressIndicator
+      android:id="@+id/progress_indicator"
+      android:layout_width="8dp"
+      android:layout_height="8dp"
+      android:indeterminateOnly="true"
+      android:visibility="gone"
+      app:indicatorColor="?attr/textOnControlMain"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
       />
 
 </merge>

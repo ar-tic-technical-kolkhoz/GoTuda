@@ -11,6 +11,7 @@ import com.vk59.gotuda.MainFragmentState.ErrorState
 import com.vk59.gotuda.MainFragmentState.FinishActivity
 import com.vk59.gotuda.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.MainFragmentState.Main
+import com.vk59.gotuda.MainFragmentState.MainButtonLoading
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
 import com.vk59.gotuda.core.coroutines.AppDispatcher
@@ -125,6 +126,7 @@ class MainViewModel : ViewModel() {
     // TODO: Exception handler
     viewModelScope.launch {
       try {
+        state.value = MainButtonLoading
         val recommendation = recommendationRepository.getRecommendation()
         state.value = LaunchPlace(recommendation.place)
       } catch (t: Throwable) {
@@ -152,6 +154,8 @@ sealed interface MainFragmentState {
   object FinishActivity : MainFragmentState
 
   object Main : MainFragmentState
+
+  object MainButtonLoading : MainFragmentState
 
   class LaunchPlace(val place: PlaceToVisit) : MainFragmentState
 

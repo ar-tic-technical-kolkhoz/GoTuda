@@ -28,6 +28,7 @@ import com.vk59.gotuda.MainFragmentState.ErrorState
 import com.vk59.gotuda.MainFragmentState.FinishActivity
 import com.vk59.gotuda.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.MainFragmentState.Main
+import com.vk59.gotuda.MainFragmentState.MainButtonLoading
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
 import com.vk59.gotuda.core.commitWithAnimation
@@ -79,21 +80,18 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   @SuppressLint("ClickableViewAccessibility")
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    Glide.with(requireContext()).load(DEFAULT_PHOTO_URL)
-      .into(binding.userPhoto)
+    Glide.with(requireContext()).load(DEFAULT_PHOTO_URL).into(binding.userPhoto)
     currentModalView = binding.mainBottomButtons.root
     binding.userPhoto.setOnClickListener {
       launchPassport()
     }
     launchMainButtons()
     launchDebugBottomButtons()
-    val callback: OnBackPressedCallback =
-      object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() = viewModel.backPressed()
-      }
+    val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
+      override fun handleOnBackPressed() = viewModel.backPressed()
+    }
     requireActivity().onBackPressedDispatcher.addCallback(
-      viewLifecycleOwner,
-      callback
+      viewLifecycleOwner, callback
     )
   }
 
@@ -136,6 +134,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
       viewModel.listenToFragmentState().collectLatest { state ->
         when (state) {
           Main -> launchMainButtons()
+          MainButtonLoading -> launchMainButtons(loading = true)
           is LaunchPlace -> launchCardRecommendations(state.place)
           is ErrorState -> { /* TODO*/
           }
@@ -172,8 +171,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   override fun onPause() {
     super.onPause()
     Configuration.getInstance().save(
-      getApplicationContext(),
-      PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+      getApplicationContext(), PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
     )
     binding.mapView.onPause()
   }
@@ -207,30 +205,42 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     }
   }
 
-  private fun launchMainButtons() {
+  private fun launchMainButtons(loading: Boolean = false) {
     currentModalView?.makeGone()
 
-    binding.mainBottomButtons.root.makeVisible()
-    currentModalView = binding.mainBottomButtons.root
-    binding.mainBottomButtons.settingsButton.setIconResource(R.drawable.ic_settings)
-    binding.mainBottomButtons.settingsButton.setOnClickListener {
-      launchSettings()
-    }
-    binding.mainBottomButtons.geoButton.setIconResource(R.drawable.ic_geo_arrow)
-    binding.mainBottomButtons.geoButton.setOnClickListener {
-      viewModel.moveToUserGeo()
-      handler.postDelayed(
-        {
-          binding.mainBottomButtons.geoButton.fadeOut(to = View.INVISIBLE)
-        },
-        500L
-      )
-    }
-    binding.mainBottomButtons.goTudaButton.apply {
-      setTitle("Go")
-      setTitleSizeSp(30f)
-      setOnClickListener {
-        viewModel.requestRecommendations()
+    binding.mainBottomButtons.apply {
+
+      root.makeVisible()
+      currentModalView = binding.mainBottomButtons.root
+      settingsButton.isClickable = !loading
+      geoButton.isClickable = !loading
+      settingsButton.setIconResource(R.drawable.ic_settings)
+      geoButton.setIconResource(R.drawable.ic_geo_arrow)
+
+      if (loading) {
+        goTudaButton.setOnClickListener {}
+        settingsButton.setOnClickListener { }
+        geoButton.setOnClickListener {}
+        goTudaButton.setProgressing(true)
+      } else {
+        goTudaButton.setTitle("Go")
+        goTudaButton.setTitleSizeSp(30f)
+        goTudaButton.setOnClickListener {
+          viewModel.requestRecommendations()
+        }
+        goTudaButton.setProgressing(false)
+        settingsButton.setOnClickListener {
+          launchSettings()
+        }
+        geoButton.setOnClickListener {
+          viewModel.moveToUserGeo()
+          handler.postDelayed(
+            {
+              geoButton.fadeOut(to = View.INVISIBLE)
+            }, 500L
+          )
+        }
+
       }
     }
   }
@@ -274,11 +284,9 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   private fun initLocationManagerLessP(manager: LocationManager) {
     if (ActivityCompat.checkSelfPermission(
-        requireContext(),
-        permission.ACCESS_FINE_LOCATION
+        requireContext(), permission.ACCESS_FINE_LOCATION
       ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-        requireContext(),
-        permission.ACCESS_COARSE_LOCATION
+        requireContext(), permission.ACCESS_COARSE_LOCATION
       ) != PackageManager.PERMISSION_GRANTED
     ) {
       registerForActivityResult(
