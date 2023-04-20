@@ -253,7 +253,10 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     binding.cardsView.makeVisible()
     binding.cardsView.bindPlace(place)
     currentModalView = binding.cardsView
-    binding.cardsView.setOnBackButtonClickListener { onBackPressed() }
+    binding.cardsView.setOnBackButtonClickListener {
+      viewModel.deselectObject()
+      onBackPressed()
+    }
   }
 
   private fun initMap(initialGeoPoint: MyGeoPoint?) {

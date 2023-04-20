@@ -97,16 +97,20 @@ class MainViewModel : ViewModel() {
 
   fun placeTapped(mapObjectId: String) {
     viewModelScope.launch(AppDispatcher.io()) {
-      val list = mapObjectsFlow.value.toMutableList()
-      list.replaceAll { if (it.id == mapObjectId) it.copy(selected = true) else it.copy(selected = false) }
-      mapObjectsFlow.value = list
       try {
+        selectObject(mapObjectId)
         val place = placesRepository.getPlaceById(mapObjectId)
         place?.let { state.value = LaunchPlace(place) }
       } catch (t: Throwable) {
         state.value = ErrorState(t)
       }
     }
+  }
+
+  private fun selectObject(id: String) {
+    val list = mapObjectsFlow.value.toMutableList()
+    list.replaceAll { if (it.id == id) it.copy(selected = true) else it.copy(selected = false) }
+    mapObjectsFlow.value = list
   }
 
   fun requestRecommendations() {
@@ -119,6 +123,12 @@ class MainViewModel : ViewModel() {
         state.value = ErrorState(t)
       }
     }
+  }
+
+  fun deselectObject() {
+    val list = mapObjectsFlow.value.toMutableList()
+    list.replaceAll { if (it.selected) it.copy(selected = false) else it }
+    mapObjectsFlow.value = list
   }
 }
 
