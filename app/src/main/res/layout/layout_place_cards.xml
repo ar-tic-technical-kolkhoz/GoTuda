@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     >
@@ -27,7 +28,7 @@
   <androidx.cardview.widget.CardView
       android:id="@+id/place"
       android:layout_width="0dp"
-      android:layout_height="60dp"
+      android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
       android:background="?attr/bgMain"
       android:orientation="horizontal"
@@ -35,7 +36,86 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@id/back_button"
-      />
+      >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        >
+
+      <com.google.android.material.imageview.ShapeableImageView
+          android:id="@+id/place_photo"
+          android:layout_width="80dp"
+          android:layout_height="62dp"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent"
+          app:shapeAppearance="@style/roundedImageViewRounded16"
+          />
+
+      <TextView
+          android:id="@+id/place_name"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="16dp"
+          android:fontFamily="sans-serif-black"
+          android:textColor="?attr/textMain"
+          android:textSize="20sp"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toEndOf="@id/place_photo"
+          app:layout_constraintTop_toTopOf="parent"
+          tools:text="Спортплощадка"
+          />
+
+      <ImageView
+          android:id="@+id/ic_address"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:layout_marginTop="8dp"
+          android:src="@drawable/ic_address"
+          android:textColor="?attr/textMinor"
+          app:layout_constraintStart_toStartOf="@id/place_name"
+          app:layout_constraintTop_toBottomOf="@id/place_name"
+          app:layout_constraintBottom_toTopOf="@id/barrier"
+          />
+
+      <TextView
+          android:id="@+id/place_address"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="8dp"
+          android:textColor="?attr/textMinor"
+          android:textSize="14sp"
+          app:layout_constraintBaseline_toBottomOf="@id/ic_address"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toEndOf="@id/ic_address"
+          app:layout_constraintBottom_toTopOf="@id/barrier"
+          tools:text="3rd Avenue, 43-12"
+          />
+
+      <androidx.constraintlayout.widget.Barrier
+          android:id="@+id/barrier"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          app:barrierDirection="bottom"
+          app:constraint_referenced_ids="place_address,ic_address,place_photo"
+          app:layout_constraintTop_toBottomOf="@id/place_photo"
+          app:layout_constraintStart_toStartOf="parent"
+          />
+
+      <com.vk59.gotuda.design.ChipListComponent
+          android:id="@+id/place_tags"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="16dp"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/barrier"
+          />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+  </androidx.cardview.widget.CardView>
 
   <com.vk59.gotuda.design.ButtonComponent
       android:id="@+id/refuse_button"

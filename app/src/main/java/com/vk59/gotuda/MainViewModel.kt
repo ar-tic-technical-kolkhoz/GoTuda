@@ -7,10 +7,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vk59.gotuda.MainFragmentState.ErrorState
+import com.vk59.gotuda.MainFragmentState.LaunchPlace
+import com.vk59.gotuda.MainFragmentState.Main
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
+import com.vk59.gotuda.core.coroutines.AppDispatcher
 import com.vk59.gotuda.data.PlacesRepository
-import com.vk59.gotuda.data.model.PlaceDto
+import com.vk59.gotuda.data.RecommendationRepository
+import com.vk59.gotuda.data.model.PlaceMap
+import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.design.button_list.ButtonUiModel
 import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.data.LastKnownLocationRepository
@@ -24,26 +30,25 @@ import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
-  // Inject
-  private val locationRepository: LocationRepository = LocationRepository()
-
   val mapViewType: LiveData<MapViewType>
     get() = _mapViewType
-
   private val _mapViewType = MutableLiveData(MAPKIT)
 
   val debugButtonsShown: StateFlow<Boolean>
     get() = _debugButtonsShown.asStateFlow()
-
   private val _debugButtonsShown = MutableStateFlow(BuildConfig.DEBUG)
 
-  private val lastKnownLocationRepository: LastKnownLocationRepository = SimpleDi.lastKnownLocationRepository
-
-  private val placesRepository = PlacesRepository()
-
-  private val mapObjectsFlow = MutableStateFlow<List<PlaceDto>>(emptyList())
+  private val mapObjectsFlow = MutableStateFlow<List<PlaceMap>>(emptyList())
 
   private val move = MutableStateFlow(Move(MyGeoPoint(0.0, 0.0)))
+
+  private val state = MutableStateFlow<MainFragmentState>(Main)
+
+  // Inject
+  private val locationRepository: LocationRepository = SimpleDi.locationRepository
+  private val lastKnownLocationRepository: LastKnownLocationRepository = SimpleDi.lastKnownLocationRepository
+  private val placesRepository: PlacesRepository = SimpleDi.placesRepository
+  private val recommendationRepository: RecommendationRepository = SimpleDi.recommendationRepository
 
   fun listenToButtons(): LiveData<List<ButtonUiModel>> {
     val buttons = listOf(
@@ -59,13 +64,17 @@ class MainViewModel : ViewModel() {
     return locationRepository.listenToLocation(locationManager)
   }
 
+  fun listenToFragmentState(): Flow<MainFragmentState> {
+    return state.asStateFlow()
+  }
+
   fun getPlaces() {
     viewModelScope.launch {
-      mapObjectsFlow.value = placesRepository.getPlaces()
+      mapObjectsFlow.value = placesRepository.getPlacesMap()
     }
   }
 
-  fun listenToMapObjects(): StateFlow<List<PlaceDto>> {
+  fun listenToMapObjects(): StateFlow<List<PlaceMap>> {
     return mapObjectsFlow.asStateFlow()
   }
 
@@ -85,6 +94,32 @@ class MainViewModel : ViewModel() {
   private fun setViewType(viewType: MapViewType) {
     _mapViewType.value = viewType
   }
+
+  fun placeTapped(mapObjectId: String) {
+    viewModelScope.launch(AppDispatcher.io()) {
+      val list = mapObjectsFlow.value.toMutableList()
+      list.replaceAll { if (it.id == mapObjectId) it.copy(selected = true) else it.copy(selected = false) }
+      mapObjectsFlow.value = list
+      try {
+        val place = placesRepository.getPlaceById(mapObjectId)
+        place?.let { state.value = LaunchPlace(place) }
+      } catch (t: Throwable) {
+        state.value = ErrorState(t)
+      }
+    }
+  }
+
+  fun requestRecommendations() {
+    // TODO: Exception handler
+    viewModelScope.launch {
+      try {
+        val recommendation = recommendationRepository.getRecommendation()
+        state.value = LaunchPlace(recommendation.place)
+      } catch (t: Throwable) {
+        state.value = ErrorState(t)
+      }
+    }
+  }
 }
 
 enum class MapViewType {
@@ -93,3 +128,12 @@ enum class MapViewType {
 }
 
 class Move(val geoPoint: MyGeoPoint)
+
+sealed interface MainFragmentState {
+
+  object Main : MainFragmentState
+
+  class LaunchPlace(val place: PlaceToVisit) : MainFragmentState
+
+  class ErrorState(val throwable: Throwable) : MainFragmentState
+}

@@ -29,26 +29,12 @@ class SettingsFragment : Fragment(layout.fragment_settings) {
     binding.everywhereButton.setSubtitle("Мы сами подберем для вас места для посещения")
     lifecycleScope.launchWhenCreated {
       viewModel.chipsState.collectLatest {
-        fillTags(it)
+        binding.tagsList.showChips(it)
       }
     }
     binding.applyButton.setTitle("Применить")
     binding.applyButton.setOnClickListener {
       parentFragmentManager.popBackStack()
-    }
-  }
-
-  private fun fillTags(chips: List<Chip>) {
-    binding.flow.referencedIds = intArrayOf()
-    chips.forEach {
-      val chipComponent = ChipComponent(requireContext()).apply {
-          layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-          setText(it.name)
-          isSelected = it.selected
-        }
-      chipComponent.id = generateViewId()
-      binding.tagsList.addView(chipComponent)
-      binding.flow.addView(chipComponent)
     }
   }
 }

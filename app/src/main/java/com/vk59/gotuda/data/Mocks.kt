@@ -1,6 +1,8 @@
 package com.vk59.gotuda.data
 
-import com.vk59.gotuda.data.model.PlaceDto
+import com.vk59.gotuda.data.model.PlaceMap
+import com.vk59.gotuda.data.model.PlaceTag
+import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.presentation.model.Place
 import com.vk59.gotuda.presentation.profile.ProfileListItem
@@ -14,13 +16,13 @@ import com.vk59.gotuda.presentation.settings.Chip
 object Mocks {
 
   val chips = listOf<Chip>(
-    Chip("1,", "Спорт", true),
-    Chip("1,", "Улица", true),
-    Chip("1,", "Помещение", false),
-    Chip("1,", "Кафе", true),
-    Chip("1,", "Парк", false),
-    Chip("1,", "Искусство", false),
-    Chip("1,", "Стритарт", true),
+    Chip("0", "Спорт", true),
+    Chip("1", "Улица", true),
+    Chip("2", "Помещение", false),
+    Chip("3", "Кафе", true),
+    Chip("4", "Парк", false),
+    Chip("5", "Искусство", false),
+    Chip("6", "Стритарт", true),
   )
 
   const val DEFAULT_PHOTO_URL = "https://crypto.ru/wp-content/plugins/q-auth/assets/img/default-user.png"
@@ -45,19 +47,68 @@ object Mocks {
       )
     ),
     HistoryPlace(
-        Place(
-          "2",
-          "Спортплощадка",
-          "https://avatars.mds.yandex.net/i?id=2a000001870d922f2adab28a942252eea8a2-405250-fast-images&n=13"
-        )
-        )
+      Place(
+        "2",
+        "Спортплощадка",
+        "https://avatars.mds.yandex.net/i?id=2a000001870d922f2adab28a942252eea8a2-405250-fast-images&n=13"
+      )
+    )
   )
 
-  val placeDtos = listOf(
-    PlaceDto("1", MyGeoPoint(59.9596, 30.406043)),
-    PlaceDto("2", MyGeoPoint(59.95916, 30.40609)),
-    PlaceDto("3", MyGeoPoint(59.961103, 30.4069)),
-    PlaceDto("4", MyGeoPoint(59.962986, 30.404977)),
-    PlaceDto("5", MyGeoPoint(59.960530, 30.400957)),
+  val placeMapList = listOf(
+    PlaceMap("1", MyGeoPoint(59.9596, 30.406043)),
+    PlaceMap("2", MyGeoPoint(59.95916, 30.40609)),
+    PlaceMap("3", MyGeoPoint(59.961103, 30.4069)),
+    PlaceMap("4", MyGeoPoint(59.962986, 30.404977)),
+    PlaceMap("5", MyGeoPoint(59.960530, 30.400957)),
+  )
+
+  val placeTags = listOf(
+    PlaceTag("0", "Спорт"),
+    PlaceTag("1", "Улица"),
+    PlaceTag("2", "Помещение"),
+    PlaceTag("3,", "Кафе"),
+    PlaceTag("4", "Парк"),
+    PlaceTag("5", "Искусство"),
+    PlaceTag("6", "Стритарт")
+  )
+
+  val places = listOf(
+    PlaceToVisit(
+      id = "1",
+      geoPoint = MyGeoPoint(59.9596, 30.406043),
+      photoUrl = "https://roliki-magazin.ru/wp-content/uploads/a/d/0/ad090bc3f1096011e1ba2ac676681976.jpeg",
+      name = "Спортплощадка",
+      address = "Полюстровский парк",
+      tags = listOf(placeTags[0], placeTags[4], placeTags[1])
+    ), PlaceToVisit(
+      id = "2",
+      geoPoint = MyGeoPoint(59.95916, 30.40609),
+      photoUrl = "https://avatars.mds.yandex.net/get-discovery-int/1339925/2a0000016d81ea8bf68486d3986d8ced10da/XXXL",
+      name = "Музей Яндекса",
+      address = "Пискаревский проспект, 2",
+      tags = listOf(placeTags[5])
+    ), PlaceToVisit(
+      id = "3",
+      geoPoint =MyGeoPoint(59.961103, 30.4069),
+      photoUrl = "https://mebellka.ru/wp-content/uploads/8/6/5/86513168834f58885e887fb521a16b11.jpeg",
+      name = "Пространство Кошка",
+      address = "Улица Жукова, 3б",
+      tags = listOf(placeTags[6], placeTags[4])
+    ), PlaceToVisit(
+      id = "4",
+      geoPoint = MyGeoPoint(59.962986, 30.404977),
+      photoUrl = "https://roliki-magazin.ru/wp-content/uploads/a/d/0/ad090bc3f1096011e1ba2ac676681976.jpeg",
+      name = "Спортплощадка",
+      address = "Полюстровский парк",
+      tags = listOf(placeTags[0], placeTags[4])
+    ), PlaceToVisit(
+      id = "5",
+      geoPoint = MyGeoPoint(59.960530, 30.400957),
+      photoUrl = "https://roliki-magazin.ru/wp-content/uploads/a/d/0/ad090bc3f1096011e1ba2ac676681976.jpeg",
+      name = "Спортплощадка",
+      address = "Полюстровский парк",
+      tags = listOf(placeTags[0], placeTags[4])
+    )
   )
 }

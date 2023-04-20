@@ -2,6 +2,7 @@ package com.vk59.gotuda.map
 
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.mapkit.YandexMapViewHolder
 import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.map.osm.OsmMapViewHolder
@@ -12,12 +13,12 @@ class MapController {
 
   private val holders: MutableList<MapViewHolder> = mutableListOf()
 
-  fun attachViews(fragment: Fragment, mapViews: List<View>, initialGeoPoint: MyGeoPoint?) {
+  fun attachViews(fragment: Fragment, mapViews: List<View>, initialGeoPoint: MyGeoPoint?, listener: MapActionsListener) {
     val fragmentRef = WeakReference(fragment)
     mapViews.forEach { mapView ->
       when(mapView) {
         is MapView -> {
-          val holder = YandexMapViewHolder(fragmentRef, initialGeoPoint)
+          val holder = YandexMapViewHolder(fragmentRef, initialGeoPoint, listener)
           holders.add(holder)
           holder.attach(mapView)
         }
@@ -34,8 +35,8 @@ class MapController {
     holders.forEach { it.moveToUserLocation(geoPoint) }
   }
 
-  fun addPlacemark(geoPoint: MyGeoPoint, drawableInt: Int) {
-    holders.forEach { it.addPlacemark(geoPoint, drawableInt) }
+  fun addPlacemark(id: String, geoPoint: MyGeoPoint, drawableInt: Int) {
+    holders.forEach { it.addPlacemark(id, geoPoint, drawableInt) }
   }
 
   fun showUserLocation(geoPoint: MyGeoPoint) {

@@ -7,6 +7,7 @@
   <attr name="controlDanger" format="color" />
 
   <attr name="textMain" format="color" />
+  <attr name="textMinor" format="color" />
   <attr name="textOnControlMain" format="color" />
   <attr name="textOnControlMinor" format="color" />
 

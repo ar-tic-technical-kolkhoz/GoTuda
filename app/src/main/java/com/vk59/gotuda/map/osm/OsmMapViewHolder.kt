@@ -50,7 +50,7 @@ class OsmMapViewHolder(fragment: WeakReference<Fragment>) : MapViewHolder(fragme
     mapView.controller.animateTo(GeoPoint(geoPoint.latitude, geoPoint.longitude), 18.0, 1000)
   }
 
-  override fun addPlacemark(geoPoint: MyGeoPoint, drawableInt: Int) {
+  override fun addPlacemark(id: String, geoPoint: MyGeoPoint, drawableInt: Int) {
 
   }
 

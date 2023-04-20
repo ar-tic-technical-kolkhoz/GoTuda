@@ -24,6 +24,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
+import com.vk59.gotuda.MainFragmentState.LaunchPlace
+import com.vk59.gotuda.MainFragmentState.ErrorState
+import com.vk59.gotuda.MainFragmentState.Main
 import com.vk59.gotuda.MapViewType.MAPKIT
 import com.vk59.gotuda.MapViewType.OSM
 import com.vk59.gotuda.core.fadeIn
@@ -31,10 +34,14 @@ import com.vk59.gotuda.core.fadeOut
 import com.vk59.gotuda.core.makeGone
 import com.vk59.gotuda.core.makeVisible
 import com.vk59.gotuda.data.Mocks.DEFAULT_PHOTO_URL
+import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.databinding.FragmentMainBinding
 import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.di.SimpleDi.mapController
 import com.vk59.gotuda.map.MapController
+import com.vk59.gotuda.map.actions.MapAction
+import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
+import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.presentation.profile.ProfileFragment
@@ -54,7 +61,7 @@ import java.util.LinkedList
 /**
  * The MainFragment must initialize all the required components only
  */
-class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
+class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapActionsListener {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
 
@@ -116,23 +123,44 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
     super.onResume()
     binding.mapView.onResume()
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+      // TODO: Bad solution, fix it!
       initMap(viewModel.obtainInitialLocation())
-    }
-
-    viewModel.getPlaces()
-    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-      viewModel.listenToMapObjects().collectLatest {
-        it.forEach { place ->
-          mapDelegate?.addPlacemark(place.geoPoint, R.drawable.ic_place)
+      viewModel.getPlaces()
+      viewModel.listenToMapObjects().collectLatest { list ->
+        list.forEach { place ->
+          val icon = if (place.selected) R.drawable.ic_place_selected else R.drawable.ic_place
+          mapDelegate?.addPlacemark(place.id, place.geoPoint, icon)
         }
       }
     }
+    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+      viewModel.listenToFragmentState().collectLatest { state ->
+        when (state) {
+          Main -> launchMain()
+          is LaunchPlace -> launchCardRecommendations(state.place)
+          is ErrorState -> { /* TODO*/
+          }
+        }
+      }
+    }
+
     val locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java) ?: return
     if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
       initLocationManager(locationManager)
     } else {
       initLocationManagerLessP(locationManager)
     }
+  }
+
+  private fun launchMain() {
+    while (backStack.isNotEmpty()) {
+      onBackPressed()
+    }
+  }
+
+  override fun handleMapAction(action: MapAction) {
+    action as SinglePlaceTap
+    viewModel.placeTapped(action.mapObjectId)
   }
 
   override fun onCameraPositionChanged(map: Map, pos: CameraPosition, reason: CameraUpdateReason, finished: Boolean) {
@@ -209,24 +237,27 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener {
         500L
       )
     }
-    binding.mainBottomButtons.goTudaButton.setTitle("Go")
-    binding.mainBottomButtons.goTudaButton.setTitleSizeSp(30f)
-    binding.mainBottomButtons.goTudaButton.setOnClickListener {
-      launchCardRecommendations()
+    binding.mainBottomButtons.goTudaButton.apply {
+      setTitle("Go")
+      setTitleSizeSp(30f)
+      setOnClickListener {
+        viewModel.requestRecommendations()
+      }
     }
   }
 
-  private fun launchCardRecommendations() {
+  private fun launchCardRecommendations(place: PlaceToVisit) {
     currentModalView?.makeGone()
     backStack.add(binding.mainBottomButtons.root)
 
     binding.cardsView.makeVisible()
+    binding.cardsView.bindPlace(place)
     currentModalView = binding.cardsView
     binding.cardsView.setOnBackButtonClickListener { onBackPressed() }
   }
 
   private fun initMap(initialGeoPoint: MyGeoPoint?) {
-    requireMapDelegate().attachViews(this, listOf(binding.mapKit, binding.mapView), initialGeoPoint)
+    requireMapDelegate().attachViews(this, listOf(binding.mapKit, binding.mapView), initialGeoPoint, this)
     viewModel.mapViewType.observe(viewLifecycleOwner) { mapType ->
       when (mapType) {
         OSM -> {

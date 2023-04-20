@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import com.vk59.gotuda.R
 import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.MapViewHolder
+import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
+import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.vk59.gotuda.map.model.MyGeoPoint
 import com.yandex.mapkit.Animation
@@ -16,6 +18,7 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.MapObjectCollection
+import com.yandex.mapkit.map.MapObjectTapListener
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
@@ -24,7 +27,8 @@ import java.lang.ref.WeakReference
 
 class YandexMapViewHolder(
   fragment: WeakReference<Fragment>,
-  private val initialGeoPoint: MyGeoPoint?
+  private val initialGeoPoint: MyGeoPoint?,
+  private val mapActionsListener: MapActionsListener
 ) : MapViewHolder(fragment) {
 
   private val handler: Handler = SimpleDi.handler
@@ -40,7 +44,13 @@ class YandexMapViewHolder(
 
   private var mapObjects: MapObjectCollection? = null
 
-  private val placeMarks = mutableSetOf<PlacemarkMapObject>()
+  private val idToPlaceMarks = mutableMapOf<String, PlacemarkMapObject>()
+  private val placeMarksToId = mutableMapOf<PlacemarkMapObject, String>()
+
+  private val placeMarkTapListener = MapObjectTapListener { mapObject, _ ->
+    placeMarksToId[mapObject]?.let { mapActionsListener.handleMapAction(SinglePlaceTap(it)) }
+    true
+  }
 
   override fun attach(mapView: View) {
     map = mapView as MapView
@@ -113,13 +123,28 @@ class YandexMapViewHolder(
     }
   }
 
-  override fun addPlacemark(geoPoint: MyGeoPoint, drawableInt: Int) {
-    placeMarks.add(
-      requireMapObjectsCollection().addPlacemark(
-        Point(geoPoint.latitude, geoPoint.longitude),
-        ImageProvider.fromBitmap(AppCompatResources.getDrawable(fragmentContext, drawableInt)?.toBitmap())
-      )
-    )
+  override fun addPlacemark(id: String, geoPoint: MyGeoPoint, drawableInt: Int) {
+    val placemark = idToPlaceMarks[id]
+    if (placemark == null) {
+      realAddPlacemark(id, geoPoint, drawableInt)
+    } else {
+      requireMapObjectsCollection().remove(placemark)
+      realAddPlacemark(id, geoPoint, drawableInt)
+    }
+  }
+
+  private fun realAddPlacemark(
+    id: String,
+    geoPoint: MyGeoPoint,
+    drawableInt: Int
+  ) {
+    idToPlaceMarks[id] = requireMapObjectsCollection().addPlacemark(
+      Point(geoPoint.latitude, geoPoint.longitude),
+      ImageProvider.fromBitmap(AppCompatResources.getDrawable(fragmentContext, drawableInt)?.toBitmap())
+    ).apply {
+      placeMarksToId[this] = id
+      addTapListener(placeMarkTapListener)
+    }
   }
 
   private fun requireMapObjectsCollection(): MapObjectCollection {
@@ -136,8 +161,8 @@ class YandexMapViewHolder(
 
   override fun detach() {
     super.detach()
-    placeMarks.forEach { mapObjects?.remove(it) }
-    placeMarks.clear()
+    idToPlaceMarks.values.forEach { mapObjects?.remove(it) }
+    idToPlaceMarks.clear()
     map = null
     mapObjects = null
   }

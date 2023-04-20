@@ -19,7 +19,11 @@ abstract class MapViewHolder(private var _fragment: WeakReference<Fragment>) {
 
   abstract fun moveToUserLocation(geoPoint: MyGeoPoint)
 
-  abstract fun addPlacemark(geoPoint: MyGeoPoint, @DrawableRes drawableInt: Int)
+  abstract fun addPlacemark(
+    id: String,
+    geoPoint: MyGeoPoint,
+    @DrawableRes drawableInt: Int
+  )
 
   abstract fun updateUserLocation(geoPoint: MyGeoPoint)
 
