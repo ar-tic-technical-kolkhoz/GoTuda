@@ -77,6 +77,16 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   private val handler: Handler = SimpleDi.handler
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java) ?: return
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
+      initLocationManager(locationManager)
+    } else {
+      initLocationManagerLessP(locationManager)
+    }
+  }
+
   @SuppressLint("ClickableViewAccessibility")
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -143,13 +153,6 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
           }
         }
       }
-    }
-
-    val locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java) ?: return
-    if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
-      initLocationManager(locationManager)
-    } else {
-      initLocationManagerLessP(locationManager)
     }
   }
 
