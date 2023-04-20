@@ -1,6 +1,7 @@
 package com.vk59.gotuda.map.data
 
 import android.Manifest.permission
+import android.annotation.SuppressLint
 import android.location.Criteria
 import android.location.LocationListener
 import android.location.LocationManager
@@ -10,7 +11,10 @@ import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.model.MyGeoPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
@@ -20,14 +24,20 @@ class LocationRepository {
 
   private val locationStateFlow = MutableStateFlow<MyGeoPoint?>(null)
 
-  @RequiresPermission(allOf = [permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION])
+  private val permissionsGranted = MutableStateFlow(false)
+
+  @SuppressLint("MissingPermission")
   fun listenToLocation(locationManager: LocationManager): Flow<MyGeoPoint> {
     requestGeoUpdates(locationManager)
     forceRequestGeoUpdates(locationManager)
     return locationStateFlow
+      .combine(permissionsGranted) { loc, granted ->
+        Pair(loc, granted)
+      }.filter { it.second }
+      .map { it.first }
       .onEach { point -> point?.let { lastKnownLocationRepository.saveLastKnownLocation(it) } }
       .onStart {
-        emit(lastKnownLocationRepository.getLastKnownLocation())
+        emit(lastKnownLocationRepository.getLastKnownLocation() ?: MyGeoPoint(0.0,0.0))
       }.filterNotNull()
   }
 

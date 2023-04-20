@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.annotation.RequiresApi
-import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -77,13 +76,15 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   private val handler: Handler = SimpleDi.handler
 
+  private var locationManager: LocationManager? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java) ?: return
+    locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java)
     if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
-      initLocationManager(locationManager)
+      initLocationManager()
     } else {
-      initLocationManagerLessP(locationManager)
+      this.requestPermissions()
     }
   }
 
@@ -103,6 +104,9 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     requireActivity().onBackPressedDispatcher.addCallback(
       viewLifecycleOwner, callback
     )
+    locationManager?.let {
+      launchObserveGeoUpdates(it)
+    }
   }
 
   private fun launchPassport() {
@@ -145,7 +149,10 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
         when (state) {
           Main -> launchMainButtons()
           MainButtonLoading -> launchMainButtons(loading = true)
-          is LaunchPlace -> launchCardRecommendations(state.place)
+          is LaunchPlace -> {
+            viewModel.selectObject(state.place.id)
+            launchCardRecommendations(state.place)
+          }
           is ErrorState -> { /* TODO*/
           }
           FinishActivity -> {
@@ -279,13 +286,13 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   }
 
   @RequiresApi(VERSION_CODES.P)
-  private fun initLocationManager(locationManager: LocationManager) {
-    if (locationManager.isLocationEnabled) {
-      initLocationManagerLessP(locationManager)
+  private fun initLocationManager() {
+    if (locationManager?.isLocationEnabled == true) {
+      this.requestPermissions()
     }
   }
 
-  private fun initLocationManagerLessP(manager: LocationManager) {
+  private fun requestPermissions() {
     if (ActivityCompat.checkSelfPermission(
         requireContext(), permission.ACCESS_FINE_LOCATION
       ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
@@ -295,18 +302,13 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
       registerForActivityResult(
         RequestMultiplePermissions(),
       ) { isGranted ->
-        if (isGranted.values.all { it }) {
-          launchObserveGeoUpdates(manager)
-        } else {
+        if (!isGranted.values.all { it }) {
           Toast.makeText(requireContext(), "Permission denied :(", Toast.LENGTH_LONG).show()
         }
       }.launch(arrayOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION))
-    } else {
-      launchObserveGeoUpdates(manager)
     }
   }
 
-  @RequiresPermission(allOf = [permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION])
   private fun launchObserveGeoUpdates(manager: LocationManager) {
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
       viewModel.listenToUserGeo(manager).collect {

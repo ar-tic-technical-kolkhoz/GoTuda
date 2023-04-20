@@ -68,7 +68,6 @@ class MainViewModel : ViewModel() {
     }
   }
 
-  @RequiresPermission(allOf = [permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION])
   fun listenToUserGeo(locationManager: LocationManager): Flow<MyGeoPoint> {
     return locationRepository.listenToLocation(locationManager)
   }
@@ -116,7 +115,7 @@ class MainViewModel : ViewModel() {
     }
   }
 
-  private fun selectObject(id: String) {
+  fun selectObject(id: String) {
     val list = mapObjectsFlow.value.toMutableList()
     list.replaceAll { if (it.id == id) it.copy(selected = true) else it.copy(selected = false) }
     mapObjectsFlow.value = list
