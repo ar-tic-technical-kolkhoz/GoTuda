@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.vk59.gotuda.data.AuthRepository
+import com.vk59.gotuda.data.AuthRepositoryMockImpl
 import com.vk59.gotuda.data.PlacesRepository
 import com.vk59.gotuda.data.RecommendationRepository
 import com.vk59.gotuda.data.RecommendationRepositoryMock
@@ -41,5 +43,9 @@ object SimpleDi {
 
   val placesRepository: PlacesRepository by lazy {
     PlacesRepository()
+  }
+
+  val authRepository: AuthRepository by lazy {
+    AuthRepositoryMockImpl()
   }
 }

@@ -48,6 +48,7 @@ dependencies {
 
   // MapKit
   implementation 'com.yandex.android:maps.mobile:4.2.2-lite'
+  implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 //   implementation 'com.yandex.android:maps.mobile:4.2.2-full'
 
   // TODO: May be to remove
