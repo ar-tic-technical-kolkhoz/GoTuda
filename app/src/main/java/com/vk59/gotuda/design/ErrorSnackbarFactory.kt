@@ -7,6 +7,7 @@ import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 import com.vk59.gotuda.R
 import com.vk59.gotuda.core.colorAttr
+import com.vk59.gotuda.core.dpToPx
 
 class ErrorSnackbarFactory(private val view: View) {
 
@@ -18,7 +19,8 @@ class ErrorSnackbarFactory(private val view: View) {
     sbTextView.setTextColor(view.colorAttr(R.attr.textMain))
     snackbar.setBackgroundTint(view.colorAttr(R.attr.bgMain))
     val params = view.layoutParams as FrameLayout.LayoutParams
-    params.gravity = Gravity.TOP
+    params.gravity = Gravity.BOTTOM
+    params.bottomMargin = view.dpToPx(16)
     view.layoutParams = params
     return snackbar
   }

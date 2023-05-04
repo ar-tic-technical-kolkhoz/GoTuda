@@ -1,4 +1,4 @@
-package com.vk59.gotuda
+package com.vk59.gotuda.presentation.map
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
@@ -23,13 +23,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
-import com.vk59.gotuda.MainFragmentState.ErrorState
-import com.vk59.gotuda.MainFragmentState.FinishActivity
-import com.vk59.gotuda.MainFragmentState.LaunchPlace
-import com.vk59.gotuda.MainFragmentState.Main
-import com.vk59.gotuda.MainFragmentState.MainButtonLoading
-import com.vk59.gotuda.MapViewType.MAPKIT
-import com.vk59.gotuda.MapViewType.OSM
+import com.vk59.gotuda.R
+import com.vk59.gotuda.R.drawable
+import com.vk59.gotuda.R.layout
 import com.vk59.gotuda.core.commitWithAnimation
 import com.vk59.gotuda.core.fadeIn
 import com.vk59.gotuda.core.fadeOut
@@ -46,6 +42,13 @@ import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
 import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.vk59.gotuda.map.model.MyGeoPoint
+import com.vk59.gotuda.presentation.map.MainFragmentState.ErrorState
+import com.vk59.gotuda.presentation.map.MainFragmentState.FinishActivity
+import com.vk59.gotuda.presentation.map.MainFragmentState.LaunchPlace
+import com.vk59.gotuda.presentation.map.MainFragmentState.Main
+import com.vk59.gotuda.presentation.map.MainFragmentState.MainButtonLoading
+import com.vk59.gotuda.presentation.map.MapViewType.MAPKIT
+import com.vk59.gotuda.presentation.map.MapViewType.OSM
 import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
@@ -55,6 +58,7 @@ import com.yandex.mapkit.map.CameraUpdateReason
 import com.yandex.mapkit.map.CameraUpdateReason.GESTURES
 import com.yandex.mapkit.map.Map
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import timber.log.Timber
 
@@ -62,7 +66,7 @@ import timber.log.Timber
 /**
  * The MainFragment must initialize all the required components only
  */
-class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapActionsListener {
+class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsListener {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
 
@@ -133,18 +137,18 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   override fun onResume() {
     super.onResume()
     binding.mapView.onResume()
-    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+    viewLifecycleOwner.lifecycleScope.launch {
       // TODO: Bad solution, fix it!
       initMap(viewModel.obtainInitialLocation())
       viewModel.getPlaces()
       viewModel.listenToMapObjects().collectLatest { list ->
         list.forEach { place ->
-          val icon = if (place.selected) R.drawable.ic_place_selected else R.drawable.ic_place
+          val icon = if (place.selected) drawable.ic_place_selected else drawable.ic_place
           mapDelegate?.addPlacemark(place.id, place.geoPoint, icon)
         }
       }
     }
-    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+    viewLifecycleOwner.lifecycleScope.launch {
       viewModel.listenToFragmentState().collectLatest { state ->
         when (state) {
           Main -> launchMainButtons()
@@ -205,7 +209,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   }
 
   private fun launchDebugBottomButtons() {
-    lifecycleScope.launchWhenResumed {
+    lifecycleScope.launch {
       viewModel.debugButtonsShown.collectLatest {
         binding.buttonList.isVisible = it
       }
@@ -224,8 +228,8 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
       currentModalView = binding.mainBottomButtons.root
       settingsButton.isClickable = !loading
       geoButton.isClickable = !loading
-      settingsButton.setIconResource(R.drawable.ic_settings)
-      geoButton.setIconResource(R.drawable.ic_geo_arrow)
+      settingsButton.setIconResource(drawable.ic_settings)
+      geoButton.setIconResource(drawable.ic_geo_arrow)
 
       if (loading) {
         goTudaButton.setOnClickListener {}
@@ -310,7 +314,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   }
 
   private fun launchObserveGeoUpdates(manager: LocationManager) {
-    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+    viewLifecycleOwner.lifecycleScope.launch {
       viewModel.listenToUserGeo(manager).collect {
         if (followToUserLocation) {
           try {
