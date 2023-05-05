@@ -35,7 +35,7 @@ class LocationRepository @Inject constructor(
     return locationStateFlow
       .combine(permissionsGranted) { loc, granted ->
         Pair(loc, granted)
-      }.filter { it.second }
+      }.filter { !it.second }
       .map { it.first }
       .onEach { point -> point?.let { lastKnownLocationRepository.saveLastKnownLocation(it) } }
       .onStart {

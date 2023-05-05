@@ -2,7 +2,6 @@ package com.vk59.gotuda.presentation.map
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
@@ -10,7 +9,6 @@ import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.preference.PreferenceManager
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -25,8 +23,6 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
 import com.vk59.gotuda.R
-import com.vk59.gotuda.R.drawable
-import com.vk59.gotuda.R.layout
 import com.vk59.gotuda.core.commitWithAnimation
 import com.vk59.gotuda.core.fadeIn
 import com.vk59.gotuda.core.fadeOut
@@ -35,19 +31,18 @@ import com.vk59.gotuda.core.makeVisible
 import com.vk59.gotuda.data.mock.Mocks.DEFAULT_PHOTO_URL
 import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.databinding.FragmentMainBinding
+import com.vk59.gotuda.design.ErrorSnackbarFactory
 import com.vk59.gotuda.map.MapController
 import com.vk59.gotuda.map.actions.MapAction
 import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
 import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.vk59.gotuda.map.model.MyGeoPoint
-import com.vk59.gotuda.presentation.map.MainFragmentState.ErrorState
 import com.vk59.gotuda.presentation.map.MainFragmentState.FinishActivity
 import com.vk59.gotuda.presentation.map.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.presentation.map.MainFragmentState.Main
 import com.vk59.gotuda.presentation.map.MainFragmentState.MainButtonLoading
 import com.vk59.gotuda.presentation.map.MapViewType.MAPKIT
-import com.vk59.gotuda.presentation.map.MapViewType.OSM
 import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
@@ -59,23 +54,26 @@ import com.yandex.mapkit.map.Map
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.osmdroid.config.Configuration
 import timber.log.Timber
+import javax.inject.Inject
 
 // TODO: Make it initializing Fragment.
 /**
  * The MainFragment must initialize all the required components only
  */
 @AndroidEntryPoint
-class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsListener {
+class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapActionsListener {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
 
   private val viewModel: MainViewModel by viewModels()
 
+  @Inject
+  lateinit var mapController: MapController
+
   private var currentModalView: View? = null
-  private var mapController: MapController? = null
   private var locationManager: LocationManager? = null
+
   // TODO: Move to repository
   private var followToUserLocation: Boolean = true
 
@@ -100,16 +98,12 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
       launchPassport()
     }
     launchMainButtons()
-    launchDebugBottomButtons()
     val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
       override fun handleOnBackPressed() = viewModel.backPressed()
     }
     requireActivity().onBackPressedDispatcher.addCallback(
       viewLifecycleOwner, callback
     )
-    locationManager?.let {
-      launchObserveGeoUpdates(it)
-    }
   }
 
   private fun launchPassport() {
@@ -135,17 +129,19 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
 
   override fun onResume() {
     super.onResume()
-    binding.mapView.onResume()
     viewLifecycleOwner.lifecycleScope.launch {
       // TODO: Bad solution, fix it!
       initMap(viewModel.obtainInitialLocation())
       viewModel.getPlaces()
       viewModel.listenToMapObjects().collectLatest { list ->
         list.forEach { place ->
-          val icon = if (place.selected) drawable.ic_place_selected else drawable.ic_place
-          this@MainFragment.mapController?.addPlacemark(place.id, place.geoPoint, icon)
+          val icon = if (place.selected) R.drawable.ic_place_selected else R.drawable.ic_place
+          this@MainFragment.mapController.addPlacemark(place.id, place.geoPoint, icon)
         }
       }
+    }
+    locationManager?.let {
+      launchObserveGeoUpdates(it)
     }
     viewLifecycleOwner.lifecycleScope.launch {
       viewModel.listenToFragmentState().collectLatest { state ->
@@ -156,11 +152,28 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
             viewModel.selectObject(state.place.id)
             launchCardRecommendations(state.place)
           }
-          is ErrorState -> { /* TODO*/
-          }
           FinishActivity -> {
             requireActivity().finish()
           }
+        }
+      }
+    }
+
+    viewLifecycleOwner.lifecycleScope.launch {
+      viewModel.listenToError().collectLatest { error ->
+        if (error is ErrorState.Error) {
+          ErrorSnackbarFactory(binding.root).create(R.drawable.ic_warning, getString(R.string.something_went_wrong))
+            .show()
+        }
+      }
+    }
+
+    viewLifecycleOwner.lifecycleScope.launch {
+      viewModel.listenToRoutes().collectLatest {
+        if (it is RoutesState.WalkRoute) {
+          mapController.showRoute(it.route)
+        } else {
+          mapController.removeRoute()
         }
       }
     }
@@ -181,41 +194,12 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
     }
   }
 
-  override fun onPause() {
-    super.onPause()
-    Configuration.getInstance().save(
-      getApplicationContext(), PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
-    )
-    binding.mapView.onPause()
-  }
-
   override fun onStop() {
     binding.mapKit.onStop()
     MapKitFactory.getInstance().onStop()
-    this.mapController?.detach()
-    this.mapController = null
+    this.mapController.detach()
     binding.mapKit.map.addCameraListener(this)
     super.onStop()
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    binding.mapView.onDetach()
-  }
-
-  private fun getApplicationContext(): Context {
-    return requireContext().applicationContext
-  }
-
-  private fun launchDebugBottomButtons() {
-    lifecycleScope.launch {
-      viewModel.debugButtonsShown.collectLatest {
-        binding.buttonList.isVisible = it
-      }
-    }
-    viewModel.listenToButtons().observe(viewLifecycleOwner) { buttons ->
-      binding.buttonList.addButtons(buttons)
-    }
   }
 
   private fun launchMainButtons(loading: Boolean = false) {
@@ -227,8 +211,8 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
       currentModalView = binding.mainBottomButtons.root
       settingsButton.isClickable = !loading
       geoButton.isClickable = !loading
-      settingsButton.setIconResource(drawable.ic_settings)
-      geoButton.setIconResource(drawable.ic_geo_arrow)
+      settingsButton.setIconResource(R.drawable.ic_settings)
+      geoButton.setIconResource(R.drawable.ic_geo_arrow)
 
       if (loading) {
         goTudaButton.setOnClickListener {}
@@ -268,19 +252,17 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
       viewModel.deselectObject()
       viewModel.backPressed()
     }
+    binding.cardsView.setOnGeoButtonClickListener {
+      viewModel.moveToUserGeo()
+    }
   }
 
   private fun initMap(initialGeoPoint: MyGeoPoint?) {
-    requireMapController().attachViews(this, listOf(binding.mapKit, binding.mapView), initialGeoPoint, this)
+    requireMapController().attachViews(listOf(binding.mapKit), initialGeoPoint, this)
     viewModel.mapViewType.observe(viewLifecycleOwner) { mapType ->
       when (mapType) {
-        OSM -> {
-          binding.mapKit.isVisible = false
-          binding.mapView.isVisible = true
-        }
         MAPKIT -> {
           binding.mapKit.isVisible = true
-          binding.mapView.isVisible = false
         }
         else -> { /* Nothing to do */
         }
@@ -314,11 +296,11 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
 
   private fun launchObserveGeoUpdates(manager: LocationManager) {
     viewLifecycleOwner.lifecycleScope.launch {
-      viewModel.listenToUserGeo(manager).collect {
+      viewModel.listenToUserGeo(manager).collectLatest {
+        requireMapController().showUserLocation(it)
         if (followToUserLocation) {
           try {
             requireMapController().moveToUserLocation(it)
-            requireMapController().showUserLocation(it)
           } catch (e: java.lang.IllegalStateException) {
             Timber.d(e)
           } catch (mapNotAttached: MapNotAttachedToWindowException) {
@@ -327,7 +309,7 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
         }
       }
     }
-    viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+    viewLifecycleOwner.lifecycleScope.launch {
       viewModel.listenToMove().collect {
         followToUserLocation = true
         requireMapController().moveToUserLocation(it.geoPoint)
@@ -336,7 +318,7 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
   }
 
   private fun requireMapController(): MapController {
-    return this.mapController ?: MapController().also { mapController = it }
+    return this.mapController
   }
 
   companion object {

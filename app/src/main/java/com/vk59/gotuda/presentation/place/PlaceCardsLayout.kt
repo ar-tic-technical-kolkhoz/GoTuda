@@ -35,6 +35,10 @@ class PlaceCardsLayout @JvmOverloads constructor(
       placeTags.showChips(place.tags.toChips())
     }
   }
+
+  fun setOnGeoButtonClickListener(function: () -> Unit) {
+    binding.geoButton.setOnClickListener { function.invoke() }
+  }
 }
 
 private fun List<PlaceTag>.toChips(): List<Chip> {

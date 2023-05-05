@@ -48,14 +48,11 @@ dependencies {
   implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
   implementation 'androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1'
 
-  // OSM
-  implementation 'org.osmdroid:osmdroid-android:6.1.14'
-
   // MapKit
-  implementation 'com.yandex.android:maps.mobile:4.2.2-lite'
+//  implementation 'com.yandex.android:maps.mobile:4.2.2-lite'
   implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
   implementation 'com.google.android.gms:play-services-auth:20.1.0'
-//   implementation 'com.yandex.android:maps.mobile:4.2.2-full'
+   implementation 'com.yandex.android:maps.mobile:4.2.2-full'
 
   // TODO: May be to remove
   def nav_version = "2.5.3"

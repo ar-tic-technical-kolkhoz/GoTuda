@@ -1,31 +1,26 @@
 package com.vk59.gotuda.map
 
 import android.view.View
-import androidx.fragment.app.Fragment
 import com.vk59.gotuda.map.actions.MapActionsListener
-import com.vk59.gotuda.map.mapkit.YandexMapViewHolder
+import com.vk59.gotuda.map.mapkit.MapOverlayFactory
 import com.vk59.gotuda.map.model.MyGeoPoint
-import com.vk59.gotuda.map.osm.OsmMapViewHolder
 import com.yandex.mapkit.mapview.MapView
-import java.lang.ref.WeakReference
+import com.yandex.mapkit.transport.masstransit.Route
+import javax.inject.Inject
 
-class MapController {
+class MapController @Inject constructor(
+  private val mapOverlayFactory: MapOverlayFactory,
+) {
 
   private val holders: MutableList<MapViewHolder> = mutableListOf()
 
-  fun attachViews(fragment: Fragment, mapViews: List<View>, initialGeoPoint: MyGeoPoint?, listener: MapActionsListener) {
-    val fragmentRef = WeakReference(fragment)
+  fun attachViews(mapViews: List<View>, initialGeoPoint: MyGeoPoint?, listener: MapActionsListener) {
     mapViews.forEach { mapView ->
-      when(mapView) {
+      when (mapView) {
         is MapView -> {
-          val holder = YandexMapViewHolder(fragmentRef, initialGeoPoint, listener)
+          val holder = mapOverlayFactory.create(initialGeoPoint, listener)
           holders.add(holder)
           holder.attach(mapView)
-        }
-        is org.osmdroid.views.MapView -> {
-          val delegate = OsmMapViewHolder(fragmentRef)
-          holders.add(delegate)
-          delegate.attach(mapView)
         }
       }
     }
@@ -41,6 +36,14 @@ class MapController {
 
   fun showUserLocation(geoPoint: MyGeoPoint) {
     holders.forEach { it.updateUserLocation(geoPoint) }
+  }
+
+  fun showRoute(route: Route) {
+    holders.forEach { it.showRoute(route) }
+  }
+
+  fun removeRoute() {
+    holders.forEach { it.removeRoute() }
   }
 
   fun detach() {

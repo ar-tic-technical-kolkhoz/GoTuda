@@ -9,24 +9,27 @@ import com.vk59.gotuda.BuildConfig
 import com.vk59.gotuda.core.coroutines.AppDispatcher
 import com.vk59.gotuda.data.LastKnownLocationRepository
 import com.vk59.gotuda.data.LocationRepository
+import com.vk59.gotuda.data.MapWalkRoutesRepository
 import com.vk59.gotuda.data.PlacesRepository
 import com.vk59.gotuda.data.RecommendationRepository
 import com.vk59.gotuda.data.model.PlaceMap
 import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.design.button_list.ButtonUiModel
 import com.vk59.gotuda.map.model.MyGeoPoint
-import com.vk59.gotuda.presentation.map.MainFragmentState.ErrorState
 import com.vk59.gotuda.presentation.map.MainFragmentState.FinishActivity
 import com.vk59.gotuda.presentation.map.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.presentation.map.MainFragmentState.Main
 import com.vk59.gotuda.presentation.map.MainFragmentState.MainButtonLoading
 import com.vk59.gotuda.presentation.map.MapViewType.MAPKIT
 import com.vk59.gotuda.presentation.map.MapViewType.OSM
+import com.vk59.gotuda.presentation.map.RoutesState.None
+import com.yandex.mapkit.transport.masstransit.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,6 +37,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
   private val placesRepository: PlacesRepository,
   private val locationRepository: LocationRepository,
+  private val mapWalkRoutesRepository: MapWalkRoutesRepository,
   private val recommendationRepository: RecommendationRepository,
   private val lastKnownLocationRepository: LastKnownLocationRepository
 ) : ViewModel() {
@@ -50,7 +54,13 @@ class MainViewModel @Inject constructor(
 
   private val move = MutableStateFlow(Move(MyGeoPoint(0.0, 0.0)))
 
-  private val state = MutableStateFlow<MainFragmentState>(Main)
+  private val state = MutableStateFlow<MainFragmentState>(Main).also {
+    it.onEach { errorFlow.value = ErrorState.None }
+  }
+
+  private val routesFlow = MutableStateFlow<RoutesState>(None)
+
+  private val errorFlow = MutableStateFlow<ErrorState>(ErrorState.None)
 
   fun listenToButtons(): LiveData<List<ButtonUiModel>> {
     val buttons = listOf(
@@ -62,7 +72,7 @@ class MainViewModel @Inject constructor(
   }
 
   fun backPressed() {
-    state.value = when(state.value) {
+    state.value = when (state.value) {
       is LaunchPlace -> Main
       else -> FinishActivity
     }
@@ -90,6 +100,10 @@ class MainViewModel @Inject constructor(
     return move.asStateFlow()
   }
 
+  fun listenToRoutes(): StateFlow<RoutesState> {
+    return routesFlow
+  }
+
   fun moveToUserGeo() {
     val location = locationRepository.obtainLocation() ?: return
     move.value = Move(location)
@@ -110,7 +124,7 @@ class MainViewModel @Inject constructor(
         val place = placesRepository.getPlaceById(mapObjectId)
         place?.let { state.value = LaunchPlace(place) }
       } catch (t: Throwable) {
-        state.value = ErrorState(t)
+        errorFlow.value = ErrorState.Error(t)
       }
     }
   }
@@ -119,6 +133,20 @@ class MainViewModel @Inject constructor(
     val list = mapObjectsFlow.value.toMutableList()
     list.replaceAll { if (it.id == id) it.copy(selected = true) else it.copy(selected = false) }
     mapObjectsFlow.value = list
+    viewModelScope.launch {
+      val point1 = locationRepository.obtainLocation() ?: return@launch
+      val point2 = list.find { it.id == id }?.geoPoint ?: return@launch
+      try {
+        val route = mapWalkRoutesRepository.getRoutes(point1, point2).firstOrNull() ?: return@launch
+        routesFlow.value = RoutesState.WalkRoute(route)
+      } catch (throwable: Throwable) {
+        errorFlow.value = ErrorState.Error(throwable)
+      }
+    }
+  }
+
+  fun listenToError(): Flow<ErrorState> {
+    return errorFlow
   }
 
   fun requestRecommendations() {
@@ -129,7 +157,7 @@ class MainViewModel @Inject constructor(
         val recommendation = recommendationRepository.getRecommendation()
         state.value = LaunchPlace(recommendation.place)
       } catch (t: Throwable) {
-        state.value = ErrorState(t)
+        errorFlow.value = ErrorState.Error(t)
       }
     }
   }
@@ -138,6 +166,7 @@ class MainViewModel @Inject constructor(
     val list = mapObjectsFlow.value.toMutableList()
     list.replaceAll { if (it.selected) it.copy(selected = false) else it }
     mapObjectsFlow.value = list
+    routesFlow.value = None
   }
 }
 
@@ -157,6 +186,18 @@ sealed interface MainFragmentState {
   object MainButtonLoading : MainFragmentState
 
   class LaunchPlace(val place: PlaceToVisit) : MainFragmentState
+}
 
-  class ErrorState(val throwable: Throwable) : MainFragmentState
+sealed interface RoutesState {
+
+  object None : RoutesState
+
+  class WalkRoute(val route: Route) : RoutesState
+}
+
+sealed interface ErrorState {
+
+  object None : ErrorState
+
+  class Error(val throwable: Throwable) : ErrorState
 }
