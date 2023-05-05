@@ -6,6 +6,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vk59.gotuda.BuildConfig
+import com.vk59.gotuda.core.coroutines.AppDispatcher
+import com.vk59.gotuda.data.LastKnownLocationRepository
+import com.vk59.gotuda.data.LocationRepository
+import com.vk59.gotuda.data.PlacesRepository
+import com.vk59.gotuda.data.RecommendationRepository
+import com.vk59.gotuda.data.model.PlaceMap
+import com.vk59.gotuda.data.model.PlaceToVisit
+import com.vk59.gotuda.design.button_list.ButtonUiModel
+import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.presentation.map.MainFragmentState.ErrorState
 import com.vk59.gotuda.presentation.map.MainFragmentState.FinishActivity
 import com.vk59.gotuda.presentation.map.MainFragmentState.LaunchPlace
@@ -13,23 +22,21 @@ import com.vk59.gotuda.presentation.map.MainFragmentState.Main
 import com.vk59.gotuda.presentation.map.MainFragmentState.MainButtonLoading
 import com.vk59.gotuda.presentation.map.MapViewType.MAPKIT
 import com.vk59.gotuda.presentation.map.MapViewType.OSM
-import com.vk59.gotuda.core.coroutines.AppDispatcher
-import com.vk59.gotuda.data.PlacesRepository
-import com.vk59.gotuda.data.RecommendationRepository
-import com.vk59.gotuda.data.model.PlaceMap
-import com.vk59.gotuda.data.model.PlaceToVisit
-import com.vk59.gotuda.design.button_list.ButtonUiModel
-import com.vk59.gotuda.di.SimpleDi
-import com.vk59.gotuda.map.data.LastKnownLocationRepository
-import com.vk59.gotuda.map.data.LocationRepository
-import com.vk59.gotuda.map.model.MyGeoPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+  private val placesRepository: PlacesRepository,
+  private val locationRepository: LocationRepository,
+  private val recommendationRepository: RecommendationRepository,
+  private val lastKnownLocationRepository: LastKnownLocationRepository
+) : ViewModel() {
 
   val mapViewType: LiveData<MapViewType>
     get() = _mapViewType
@@ -44,12 +51,6 @@ class MainViewModel : ViewModel() {
   private val move = MutableStateFlow(Move(MyGeoPoint(0.0, 0.0)))
 
   private val state = MutableStateFlow<MainFragmentState>(Main)
-
-  // Inject
-  private val locationRepository: LocationRepository = SimpleDi.locationRepository
-  private val lastKnownLocationRepository: LastKnownLocationRepository = SimpleDi.lastKnownLocationRepository
-  private val placesRepository: PlacesRepository = SimpleDi.placesRepository
-  private val recommendationRepository: RecommendationRepository = SimpleDi.recommendationRepository
 
   fun listenToButtons(): LiveData<List<ButtonUiModel>> {
     val buttons = listOf(

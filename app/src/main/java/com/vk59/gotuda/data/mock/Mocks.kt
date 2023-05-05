@@ -1,4 +1,4 @@
-package com.vk59.gotuda.data
+package com.vk59.gotuda.data.mock
 
 import com.vk59.gotuda.data.model.PlaceMap
 import com.vk59.gotuda.data.model.PlaceTag

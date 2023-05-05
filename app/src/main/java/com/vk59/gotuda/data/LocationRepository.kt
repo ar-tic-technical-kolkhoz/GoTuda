@@ -1,4 +1,4 @@
-package com.vk59.gotuda.map.data
+package com.vk59.gotuda.data
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
@@ -7,7 +7,6 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.location.LocationManager.GPS_PROVIDER
 import androidx.annotation.RequiresPermission
-import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.model.MyGeoPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,10 +16,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class LocationRepository {
-
-  private val lastKnownLocationRepository: LastKnownLocationRepository = SimpleDi.lastKnownLocationRepository
+@Singleton
+class LocationRepository @Inject constructor(
+  private val lastKnownLocationRepository: LastKnownLocationRepository
+) {
 
   private val locationStateFlow = MutableStateFlow<MyGeoPoint?>(null)
 
@@ -37,7 +39,7 @@ class LocationRepository {
       .map { it.first }
       .onEach { point -> point?.let { lastKnownLocationRepository.saveLastKnownLocation(it) } }
       .onStart {
-        emit(lastKnownLocationRepository.getLastKnownLocation() ?: MyGeoPoint(0.0,0.0))
+        emit(lastKnownLocationRepository.getLastKnownLocation() ?: MyGeoPoint(0.0, 0.0))
       }.filterNotNull()
   }
 

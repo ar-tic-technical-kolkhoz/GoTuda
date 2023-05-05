@@ -1,16 +1,23 @@
-package com.vk59.gotuda.map.data
+package com.vk59.gotuda.data
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import com.vk59.gotuda.core.coroutines.AppDispatcher
 import com.vk59.gotuda.map.model.MyGeoPoint
+import dagger.Reusable
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
-class LastKnownLocationRepository(context: Context) {
+@Reusable
+class LastKnownLocationRepository @Inject constructor(
+  @ApplicationContext
+  context: Context
+) {
 
   private val prefs by lazy(NONE) {
     context.getSharedPreferences(NAME_LAST_KNOWN_LOCATION_PREF, MODE_PRIVATE)

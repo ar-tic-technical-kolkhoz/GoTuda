@@ -1,7 +1,7 @@
 package com.vk59.gotuda.presentation.profile
 
 import androidx.lifecycle.ViewModel
-import com.vk59.gotuda.data.Mocks
+import com.vk59.gotuda.data.mock.Mocks
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

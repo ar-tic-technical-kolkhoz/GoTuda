@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.preference.PreferenceManager
 import android.view.View
 import android.widget.Toast
@@ -31,11 +32,9 @@ import com.vk59.gotuda.core.fadeIn
 import com.vk59.gotuda.core.fadeOut
 import com.vk59.gotuda.core.makeGone
 import com.vk59.gotuda.core.makeVisible
-import com.vk59.gotuda.data.Mocks.DEFAULT_PHOTO_URL
+import com.vk59.gotuda.data.mock.Mocks.DEFAULT_PHOTO_URL
 import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.databinding.FragmentMainBinding
-import com.vk59.gotuda.di.SimpleDi
-import com.vk59.gotuda.di.SimpleDi.mapController
 import com.vk59.gotuda.map.MapController
 import com.vk59.gotuda.map.actions.MapAction
 import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
@@ -57,6 +56,7 @@ import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.CameraUpdateReason
 import com.yandex.mapkit.map.CameraUpdateReason.GESTURES
 import com.yandex.mapkit.map.Map
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
@@ -66,6 +66,7 @@ import timber.log.Timber
 /**
  * The MainFragment must initialize all the required components only
  */
+@AndroidEntryPoint
 class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsListener {
 
   private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
@@ -73,14 +74,12 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
   private val viewModel: MainViewModel by viewModels()
 
   private var currentModalView: View? = null
-
-  private var mapDelegate: MapController? = null
-
+  private var mapController: MapController? = null
+  private var locationManager: LocationManager? = null
+  // TODO: Move to repository
   private var followToUserLocation: Boolean = true
 
-  private val handler: Handler = SimpleDi.handler
-
-  private var locationManager: LocationManager? = null
+  private val handler: Handler = Handler(Looper.getMainLooper())
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -144,7 +143,7 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
       viewModel.listenToMapObjects().collectLatest { list ->
         list.forEach { place ->
           val icon = if (place.selected) drawable.ic_place_selected else drawable.ic_place
-          mapDelegate?.addPlacemark(place.id, place.geoPoint, icon)
+          this@MainFragment.mapController?.addPlacemark(place.id, place.geoPoint, icon)
         }
       }
     }
@@ -193,8 +192,8 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
   override fun onStop() {
     binding.mapKit.onStop()
     MapKitFactory.getInstance().onStop()
-    mapDelegate?.detach()
-    mapDelegate = null
+    this.mapController?.detach()
+    this.mapController = null
     binding.mapKit.map.addCameraListener(this)
     super.onStop()
   }
@@ -272,7 +271,7 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
   }
 
   private fun initMap(initialGeoPoint: MyGeoPoint?) {
-    requireMapDelegate().attachViews(this, listOf(binding.mapKit, binding.mapView), initialGeoPoint, this)
+    requireMapController().attachViews(this, listOf(binding.mapKit, binding.mapView), initialGeoPoint, this)
     viewModel.mapViewType.observe(viewLifecycleOwner) { mapType ->
       when (mapType) {
         OSM -> {
@@ -318,8 +317,8 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
       viewModel.listenToUserGeo(manager).collect {
         if (followToUserLocation) {
           try {
-            requireMapDelegate().moveToUserLocation(it)
-            requireMapDelegate().showUserLocation(it)
+            requireMapController().moveToUserLocation(it)
+            requireMapController().showUserLocation(it)
           } catch (e: java.lang.IllegalStateException) {
             Timber.d(e)
           } catch (mapNotAttached: MapNotAttachedToWindowException) {
@@ -331,13 +330,13 @@ class MainFragment : Fragment(layout.fragment_main), CameraListener, MapActionsL
     viewLifecycleOwner.lifecycleScope.launchWhenResumed {
       viewModel.listenToMove().collect {
         followToUserLocation = true
-        requireMapDelegate().moveToUserLocation(it.geoPoint)
+        requireMapController().moveToUserLocation(it.geoPoint)
       }
     }
   }
 
-  private fun requireMapDelegate(): MapController {
-    return mapDelegate ?: mapController.also { mapDelegate = it }
+  private fun requireMapController(): MapController {
+    return this.mapController ?: MapController().also { mapController = it }
   }
 
   companion object {

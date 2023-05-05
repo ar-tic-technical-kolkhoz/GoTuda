@@ -2,11 +2,13 @@ package com.vk59.gotuda.map.mapkit
 
 import android.content.res.Configuration
 import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.vk59.gotuda.R
+import com.vk59.gotuda.core.fromDrawable
 import com.vk59.gotuda.di.SimpleDi
 import com.vk59.gotuda.map.MapViewHolder
 import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
@@ -31,7 +33,7 @@ class YandexMapViewHolder(
   private val mapActionsListener: MapActionsListener
 ) : MapViewHolder(fragment) {
 
-  private val handler: Handler = SimpleDi.handler
+  private val handler: Handler = Handler(Looper.getMainLooper())
 
   private val userLocationLayer: UserLocationLayer?
     get() = SimpleDi.userLocationLayer
@@ -79,7 +81,7 @@ class YandexMapViewHolder(
     val userLocation = requireUserLocationCollection()
     val newPlacemark = userLocation.addPlacemark(
       Point(geoPoint.latitude, geoPoint.longitude),
-      ImageProvider.fromBitmap(AppCompatResources.getDrawable(fragmentContext, R.drawable.ic_user_geo)?.toBitmap())
+      fromDrawable(fragmentContext, R.drawable.ic_user_geo)
     )
 
     handler.postDelayed(
