@@ -18,11 +18,11 @@
     <item name="bgMinor">@color/white</item>
     <item name="textMain">@color/white</item>
     <item name="textMinor">#BDBDBD</item>
-    <item name="controlMain">@color/green</item>
+    <item name="controlMain">@color/green_dark</item>
     <item name="textOnControlMain">@color/white</item>
     <item name="controlMinor">@color/dark_grey</item>
     <item name="textOnControlMinor">@color/white</item>
-    <item name="controlDanger">@color/orange</item>
+    <item name="controlDanger">@color/orange_dark</item>
     <item name="line">@color/dark_grey</item>
     <item name="mapObject">#797979</item>
   </style>
