@@ -2,4 +2,6 @@
   <string name="app_name">GoTuda</string>
   <string name="no_connection">Нет подключения к интернету</string>
   <string name="something_went_wrong">Что-то пошло не так</string>
+  <string name="welcome_go_tuda">Добро пожаловать в GoTuda!</string>
+  <string name="welcome_description">Здесь вы сможете подбирать места для прогулок по интересам</string>
 </resources>
