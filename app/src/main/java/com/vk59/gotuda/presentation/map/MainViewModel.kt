@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vk59.gotuda.BuildConfig
 import com.vk59.gotuda.core.coroutines.AppDispatcher
 import com.vk59.gotuda.data.LastKnownLocationRepository
 import com.vk59.gotuda.data.LocationRepository
@@ -14,14 +13,12 @@ import com.vk59.gotuda.data.PlacesRepository
 import com.vk59.gotuda.data.RecommendationRepository
 import com.vk59.gotuda.data.model.PlaceMap
 import com.vk59.gotuda.data.model.PlaceToVisit
-import com.vk59.gotuda.design.button_list.ButtonUiModel
 import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.presentation.map.MainFragmentState.FinishActivity
 import com.vk59.gotuda.presentation.map.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.presentation.map.MainFragmentState.Main
 import com.vk59.gotuda.presentation.map.MainFragmentState.MainButtonLoading
 import com.vk59.gotuda.presentation.map.MapViewType.MAPKIT
-import com.vk59.gotuda.presentation.map.MapViewType.OSM
 import com.vk59.gotuda.presentation.map.RoutesState.None
 import com.yandex.mapkit.transport.masstransit.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,10 +43,6 @@ class MainViewModel @Inject constructor(
     get() = _mapViewType
   private val _mapViewType = MutableLiveData(MAPKIT)
 
-  val debugButtonsShown: StateFlow<Boolean>
-    get() = _debugButtonsShown.asStateFlow()
-  private val _debugButtonsShown = MutableStateFlow(BuildConfig.DEBUG)
-
   private val mapObjectsFlow = MutableStateFlow<List<PlaceMap>>(emptyList())
 
   private val move = MutableStateFlow(Move(MyGeoPoint(0.0, 0.0)))
@@ -61,15 +54,6 @@ class MainViewModel @Inject constructor(
   private val routesFlow = MutableStateFlow<RoutesState>(None)
 
   private val errorFlow = MutableStateFlow<ErrorState>(ErrorState.None)
-
-  fun listenToButtons(): LiveData<List<ButtonUiModel>> {
-    val buttons = listOf(
-      ButtonUiModel("osm", "Open Street Map", onClick = { setViewType(OSM) }),
-      ButtonUiModel("mapkit", "MapKit", onClick = { setViewType(MAPKIT) }),
-      ButtonUiModel("showButtons", "Buttons show", onClick = { _debugButtonsShown.value = !debugButtonsShown.value })
-    )
-    return MutableLiveData(buttons)
-  }
 
   fun backPressed() {
     state.value = when (state.value) {

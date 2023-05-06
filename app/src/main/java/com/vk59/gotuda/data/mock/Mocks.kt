@@ -3,6 +3,7 @@ package com.vk59.gotuda.data.mock
 import com.vk59.gotuda.data.model.PlaceMap
 import com.vk59.gotuda.data.model.PlaceTag
 import com.vk59.gotuda.data.model.PlaceToVisit
+import com.vk59.gotuda.design.button_list.ButtonUiModel
 import com.vk59.gotuda.map.model.MyGeoPoint
 import com.vk59.gotuda.presentation.model.Place
 import com.vk59.gotuda.presentation.profile.ProfileListItem
@@ -24,6 +25,13 @@ object Mocks {
     Chip("5", "Искусство", false),
     Chip("6", "Стритарт", true),
   )
+
+  val debugButtons: List<ButtonUiModel> =
+    listOf(
+      ButtonUiModel("osm", "Open Street Map", onClick = { /* */ }),
+      ButtonUiModel("mapkit", "MapKit", onClick = {  }),
+      ButtonUiModel("showButtons", "Buttons show", onClick = { })
+    )
 
   const val DEFAULT_PHOTO_URL = "https://crypto.ru/wp-content/plugins/q-auth/assets/img/default-user.png"
 
