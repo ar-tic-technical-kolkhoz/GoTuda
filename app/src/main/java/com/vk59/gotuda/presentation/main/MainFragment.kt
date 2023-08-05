@@ -1,4 +1,4 @@
-package com.vk59.gotuda.presentation.map
+package com.vk59.gotuda.presentation.main
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
@@ -7,8 +7,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -21,15 +19,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.bumptech.glide.Glide
 import com.vk59.gotuda.R
 import com.vk59.gotuda.core.commitWithAnimation
-import com.vk59.gotuda.core.fadeIn
-import com.vk59.gotuda.core.fadeOut
 import com.vk59.gotuda.core.makeGone
 import com.vk59.gotuda.core.makeVisible
+import com.vk59.gotuda.core.view.GoViewsCoordinator
 import com.vk59.gotuda.data.PermissionsRepository
-import com.vk59.gotuda.data.mock.Mocks.DEFAULT_PHOTO_URL
 import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.databinding.FragmentMainBinding
 import com.vk59.gotuda.design.ErrorSnackbarFactory
@@ -39,11 +34,12 @@ import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
 import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.vk59.gotuda.map.model.MyGeoPoint
-import com.vk59.gotuda.presentation.map.MainFragmentState.FinishActivity
-import com.vk59.gotuda.presentation.map.MainFragmentState.LaunchPlace
-import com.vk59.gotuda.presentation.map.MainFragmentState.Main
-import com.vk59.gotuda.presentation.map.MainFragmentState.MainButtonLoading
-import com.vk59.gotuda.presentation.map.MapViewType.MAPKIT
+import com.vk59.gotuda.presentation.main.MainFragmentState.FinishActivity
+import com.vk59.gotuda.presentation.main.MainFragmentState.LaunchPlace
+import com.vk59.gotuda.presentation.main.MainFragmentState.Main
+import com.vk59.gotuda.presentation.main.MainFragmentState.MainButtonLoading
+import com.vk59.gotuda.presentation.main.MapViewType.MAPKIT
+import com.vk59.gotuda.presentation.main.buttons.MainButtonsGoViewFactory
 import com.vk59.gotuda.presentation.profile.ProfileFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
@@ -75,13 +71,14 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   @Inject
   lateinit var permissionsRepository: PermissionsRepository
 
+  @Inject
+  lateinit var goViewsCoordinator: GoViewsCoordinator
+
+  @Inject
+  lateinit var mainButtonsGoViewFactory: MainButtonsGoViewFactory
+
   private var currentModalView: View? = null
   private var locationManager: LocationManager? = null
-
-  // TODO: Move to repository
-  private var followToUserLocation: Boolean = true
-
-  private val handler: Handler = Handler(Looper.getMainLooper())
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -96,10 +93,11 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   @SuppressLint("ClickableViewAccessibility")
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    Glide.with(requireContext()).load(DEFAULT_PHOTO_URL).into(binding.userPhoto)
-    currentModalView = binding.mainBottomButtons.root
-    binding.userPhoto.setOnClickListener {
-      launchPassport()
+    lifecycleScope.launch {
+      viewModel.listenToLaunchSettings().collectLatest {
+        viewModel.settingsOpened()
+        launchSettings()
+      }
     }
     launchMainButtons()
     val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -156,6 +154,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
             viewModel.selectObject(state.place.id)
             launchCardRecommendations(state.place)
           }
+
           FinishActivity -> {
             requireActivity().finish()
           }
@@ -190,11 +189,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   override fun onCameraPositionChanged(map: Map, pos: CameraPosition, reason: CameraUpdateReason, finished: Boolean) {
     if (reason == GESTURES) {
-      followToUserLocation = false
-      val geoButton = binding.mainBottomButtons.geoButton
-      if (geoButton.visibility != View.VISIBLE) {
-        binding.mainBottomButtons.geoButton.fadeIn()
-      }
+      viewModel.changeFollowing(false)
     }
   }
 
@@ -209,41 +204,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   private fun launchMainButtons(loading: Boolean = false) {
     currentModalView?.makeGone()
 
-    binding.mainBottomButtons.apply {
-
-      root.makeVisible()
-      currentModalView = binding.mainBottomButtons.root
-      settingsButton.isClickable = !loading
-      geoButton.isClickable = !loading
-      settingsButton.setIconResource(R.drawable.ic_settings)
-      geoButton.setIconResource(R.drawable.ic_geo_arrow)
-
-      if (loading) {
-        goTudaButton.setOnClickListener {}
-        settingsButton.setOnClickListener { }
-        geoButton.setOnClickListener {}
-        goTudaButton.setProgressing(true)
-      } else {
-        goTudaButton.setTitle("Go")
-        goTudaButton.setTitleSizeSp(30f)
-        goTudaButton.setOnClickListener {
-          viewModel.requestRecommendations()
-        }
-        goTudaButton.setProgressing(false)
-        settingsButton.setOnClickListener {
-          launchSettings()
-        }
-        geoButton.setOnClickListener {
-          viewModel.moveToUserGeo()
-          handler.postDelayed(
-            {
-              geoButton.fadeOut(to = View.INVISIBLE)
-            }, 500L
-          )
-        }
-
-      }
-    }
+    goViewsCoordinator.show(mainButtonsGoViewFactory.create(viewModel), binding.root)
   }
 
   private fun launchCardRecommendations(place: PlaceToVisit) {
@@ -268,6 +229,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
         MAPKIT -> {
           binding.mapKit.isVisible = true
         }
+
         else -> { /* Nothing to do */
         }
       }
@@ -296,6 +258,8 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
           Toast.makeText(requireContext(), "Permission denied :(", Toast.LENGTH_LONG).show()
         }
       }.launch(arrayOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION))
+    } else {
+      permissionsRepository.permissionsGranted(true)
     }
   }
 
@@ -303,20 +267,18 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     viewLifecycleOwner.lifecycleScope.launch {
       viewModel.listenToUserGeo(manager).collectLatest {
         requireMapController().showUserLocation(it)
-        if (followToUserLocation) {
-          try {
-            requireMapController().moveToUserLocation(it)
-          } catch (e: java.lang.IllegalStateException) {
-            Timber.d(e)
-          } catch (mapNotAttached: MapNotAttachedToWindowException) {
-            Timber.d(mapNotAttached)
-          }
+        try {
+          requireMapController().moveToUserLocation(it)
+        } catch (e: java.lang.IllegalStateException) {
+          Timber.d(e)
+        } catch (mapNotAttached: MapNotAttachedToWindowException) {
+          Timber.d(mapNotAttached)
         }
       }
     }
     viewLifecycleOwner.lifecycleScope.launch {
       viewModel.listenToMove().collect {
-        followToUserLocation = true
+        viewModel.changeFollowing(true)
         requireMapController().moveToUserLocation(it.geoPoint)
       }
     }

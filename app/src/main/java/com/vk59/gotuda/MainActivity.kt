@@ -5,7 +5,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.vk59.gotuda.core.commitWithAnimation
-import com.vk59.gotuda.presentation.map.MainFragment
+import com.vk59.gotuda.presentation.main.MainFragment
 import com.vk59.gotuda.presentation.onboarding.OnboardingFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest

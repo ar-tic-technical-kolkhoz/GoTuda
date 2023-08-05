@@ -24,6 +24,9 @@
     <item name="textOnControlMinor">@color/white</item>
     <item name="controlDanger">@color/orange</item>
     <item name="line">@color/dark_grey</item>
+    <item name="bgSearchView">@color/white</item>
+    <item name="onIconButton">@color/blue_dark</item>
+    <item name="bgIconButton">@color/white</item>
     <item name="mapObject">#797979</item>
   </style>
 </resources>

@@ -57,16 +57,10 @@ fun View.makeVisible() {
   alpha = 0.0f
   translationY = 100f
   visibility = View.VISIBLE
-  isClickable = false
   animate()
     .alpha(1.0f)
     .translationY(0f)
-    .setListener(object : AnimatorListenerAdapter() {
-      override fun onAnimationEnd(animation: Animator) {
-        super.onAnimationEnd(animation)
-        isClickable = true
-      }
-    })
+    .setListener(object : AnimatorListenerAdapter() {})
 }
 
 inline fun FragmentManager.commitWithAnimation(

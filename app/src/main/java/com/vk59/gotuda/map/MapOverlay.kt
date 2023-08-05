@@ -5,7 +5,7 @@ import androidx.annotation.DrawableRes
 import com.vk59.gotuda.map.model.MyGeoPoint
 import com.yandex.mapkit.transport.masstransit.Route
 
-abstract class MapViewHolder() {
+abstract class MapOverlay() {
 
   abstract fun attach(mapView: View)
 

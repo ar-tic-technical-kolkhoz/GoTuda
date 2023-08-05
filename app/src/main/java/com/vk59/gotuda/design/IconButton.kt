@@ -23,6 +23,7 @@ class IconButton @JvmOverloads constructor(
     binding = ButtonIconBinding.inflate(LayoutInflater.from(context), this)
     background = AppCompatResources.getDrawable(context, R.drawable.white_button_bg)
     isClickable = true
+    elevation = 4f
 
     val a = context.obtainStyledAttributes(attrs, R.styleable.IconButton, defStyleAttr, defStyleRes)
     val icon = a.getDrawable(R.styleable.IconButton_component_icon)

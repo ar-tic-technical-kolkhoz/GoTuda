@@ -12,6 +12,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:visibility="visible"
+      android:translationZ="0dp"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -24,17 +25,6 @@
       android:paddingTop="24dp"
       android:paddingBottom="24dp"
       >
-
-    <include
-        android:id="@+id/mainBottomButtons"
-        layout="@layout/layout_bottom_buttons"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/button_list"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        />
 
     <com.vk59.gotuda.presentation.place.PlaceCardsLayout
         android:id="@+id/cards_view"
@@ -55,20 +45,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        />
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/user_photo"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:src="@color/dark_grey"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearance="@style/roundedImageViewRounded"
-        app:strokeColor="?attr/line"
-        app:strokeWidth="1dp"
         />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

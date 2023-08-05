@@ -11,7 +11,7 @@ import com.vk59.gotuda.R
 import com.vk59.gotuda.core.colorAttr
 import com.vk59.gotuda.core.fromDrawable
 import com.vk59.gotuda.design.WalkRouteInfoView
-import com.vk59.gotuda.map.MapViewHolder
+import com.vk59.gotuda.map.MapOverlay
 import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
 import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
@@ -30,14 +30,14 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ActivityContext
 
-class MapOverlay @AssistedInject constructor(
+class MapKitOverlay @AssistedInject constructor(
   @ActivityContext
   private val context: Context,
   @Assisted
   private val initialGeoPoint: MyGeoPoint?,
   @Assisted
   private val mapActionsListener: MapActionsListener,
-) : MapViewHolder() {
+) : MapOverlay() {
 
   private val handler: Handler = Handler(Looper.getMainLooper())
 

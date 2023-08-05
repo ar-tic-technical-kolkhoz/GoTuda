@@ -12,7 +12,7 @@ class MapController @Inject constructor(
   private val mapOverlayFactory: MapOverlayFactory,
 ) {
 
-  private val holders: MutableList<MapViewHolder> = mutableListOf()
+  private val holders: MutableList<MapOverlay> = mutableListOf()
 
   fun attachViews(mapViews: List<View>, initialGeoPoint: MyGeoPoint?, listener: MapActionsListener) {
     mapViews.forEach { mapView ->

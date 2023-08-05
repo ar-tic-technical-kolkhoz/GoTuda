@@ -10,5 +10,5 @@ interface MapOverlayFactory {
   fun create(
     initialGeoPoint: MyGeoPoint?,
     mapActionsListener: MapActionsListener
-  ): MapOverlay
+  ): MapKitOverlay
 }

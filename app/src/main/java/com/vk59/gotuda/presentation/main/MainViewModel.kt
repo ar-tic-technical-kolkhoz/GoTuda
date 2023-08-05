@@ -1,4 +1,4 @@
-package com.vk59.gotuda.presentation.map
+package com.vk59.gotuda.presentation.main
 
 import android.location.LocationManager
 import androidx.lifecycle.LiveData
@@ -14,18 +14,24 @@ import com.vk59.gotuda.data.RecommendationRepository
 import com.vk59.gotuda.data.model.PlaceMap
 import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.map.model.MyGeoPoint
-import com.vk59.gotuda.presentation.map.MainFragmentState.FinishActivity
-import com.vk59.gotuda.presentation.map.MainFragmentState.LaunchPlace
-import com.vk59.gotuda.presentation.map.MainFragmentState.Main
-import com.vk59.gotuda.presentation.map.MainFragmentState.MainButtonLoading
-import com.vk59.gotuda.presentation.map.MapViewType.MAPKIT
-import com.vk59.gotuda.presentation.map.RoutesState.None
+import com.vk59.gotuda.presentation.main.MainFragmentState.FinishActivity
+import com.vk59.gotuda.presentation.main.MainFragmentState.LaunchPlace
+import com.vk59.gotuda.presentation.main.MainFragmentState.Main
+import com.vk59.gotuda.presentation.main.MainFragmentState.MainButtonLoading
+import com.vk59.gotuda.presentation.main.MapViewType.MAPKIT
+import com.vk59.gotuda.presentation.main.RoutesState.None
+import com.vk59.gotuda.presentation.main.buttons.MainButtonsViewModel
+import com.vk59.gotuda.presentation.main.data.FollowUserLocationRepository
 import com.yandex.mapkit.transport.masstransit.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,8 +42,9 @@ class MainViewModel @Inject constructor(
   private val locationRepository: LocationRepository,
   private val mapWalkRoutesRepository: MapWalkRoutesRepository,
   private val recommendationRepository: RecommendationRepository,
+  private val followUserLocationRepository: FollowUserLocationRepository,
   private val lastKnownLocationRepository: LastKnownLocationRepository
-) : ViewModel() {
+) : ViewModel(), MainButtonsViewModel {
 
   val mapViewType: LiveData<MapViewType>
     get() = _mapViewType
@@ -55,6 +62,8 @@ class MainViewModel @Inject constructor(
 
   private val errorFlow = MutableStateFlow<ErrorState>(ErrorState.None)
 
+  private val goToSettingsFlow = MutableStateFlow(false)
+
   fun backPressed() {
     state.value = when (state.value) {
       is LaunchPlace -> Main
@@ -63,7 +72,14 @@ class MainViewModel @Inject constructor(
   }
 
   fun listenToUserGeo(locationManager: LocationManager): Flow<MyGeoPoint> {
-    return locationRepository.listenToLocation(locationManager)
+    return followUserLocationRepository.isFollowing
+      .flatMapLatest {
+        if (it) {
+          locationRepository.listenToLocation(locationManager)
+        } else {
+          flowOf(null)
+        }
+      }.filterNotNull()
   }
 
   fun listenToFragmentState(): Flow<MainFragmentState> {
@@ -88,9 +104,33 @@ class MainViewModel @Inject constructor(
     return routesFlow
   }
 
-  fun moveToUserGeo() {
+  fun changeFollowing(boolean: Boolean) {
+    followUserLocationRepository.changeFollowing(boolean)
+  }
+
+  override fun settingsClicked() {
+    goToSettingsFlow.value = true
+  }
+
+  fun listenToLaunchSettings(): Flow<Boolean> {
+    return goToSettingsFlow.filter { it }
+  }
+
+  fun settingsOpened() {
+    goToSettingsFlow.value = false
+  }
+
+  override fun moveToUserGeo() {
     val location = locationRepository.obtainLocation() ?: return
     move.value = Move(location)
+  }
+
+  override fun listenToLocationButton(): Flow<Boolean> {
+    return followUserLocationRepository.isFollowing
+  }
+
+  override fun followToUserLocation() {
+    changeFollowing(true)
   }
 
   suspend fun obtainInitialLocation(): MyGeoPoint? {

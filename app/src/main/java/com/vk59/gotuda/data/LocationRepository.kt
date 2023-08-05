@@ -35,7 +35,7 @@ class LocationRepository @Inject constructor(
         locationStateFlow
           .onEach { point -> point?.let { lastKnownLocationRepository.saveLastKnownLocation(it) } }
           .onStart {
-            emit(lastKnownLocationRepository.getLastKnownLocation() ?: MyGeoPoint(0.0, 0.0))
+            emit(lastKnownLocationRepository.getLastKnownLocation() ?: MyGeoPoint.DEFAULT)
           }.filterNotNull()
       }
       .onStart { emit(MyGeoPoint.DEFAULT) }
@@ -68,6 +68,13 @@ class LocationRepository @Inject constructor(
   }
 
   private fun getBestProvider(manager: LocationManager): String {
-    return manager.getBestProvider(Criteria().apply { isSpeedRequired = true }, true) ?: GPS_PROVIDER
+    return manager.getBestProvider(Criteria().apply {
+      powerRequirement = Criteria.POWER_LOW
+      accuracy = Criteria.ACCURACY_FINE
+      isSpeedRequired = true
+      isAltitudeRequired = false
+      isBearingRequired = false
+      isCostAllowed = false
+    }, true) ?: GPS_PROVIDER
   }
 }

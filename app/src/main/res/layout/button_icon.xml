@@ -15,7 +15,7 @@
       android:contentDescription="@null"
       android:importantForAccessibility="no"
       android:padding="12dp"
-      app:tint="?attr/textMain"
+      app:tint="?attr/onIconButton"
       tools:src="@drawable/ic_geo_arrow"
       />
 
