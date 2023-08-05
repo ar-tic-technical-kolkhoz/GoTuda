@@ -13,7 +13,7 @@ import com.vk59.gotuda.core.dimen
 import com.vk59.gotuda.core.dpToPx
 import com.vk59.gotuda.core.fadeIn
 import com.vk59.gotuda.core.fadeOut
-import com.vk59.gotuda.databinding.LayoutMainButtonsViewBinding
+import com.vk59.gotuda.databinding.GoViewMainButtonsBinding
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -39,7 +39,7 @@ class MainButtonsGoView @AssistedInject constructor(
     )
   }
 
-  private val binding = LayoutMainButtonsViewBinding.inflate(LayoutInflater.from(context), this)
+  private val binding = GoViewMainButtonsBinding.inflate(LayoutInflater.from(context), this)
 
   private val scope = CoroutineScope(AppDispatcher.main() + CoroutineName(javaClass.name))
 
@@ -62,10 +62,10 @@ class MainButtonsGoView @AssistedInject constructor(
     scope.launch {
       viewModel.listenToLocationButton().collectLatest {
         if (it) {
-          postDelayed{ binding.geoButton.fadeOut(to = View.INVISIBLE) }
+          postDelayed { binding.geoButton.fadeOut(to = View.INVISIBLE) }
         } else {
 
-          postDelayed{ binding.geoButton.fadeIn() }
+          postDelayed { binding.geoButton.fadeIn() }
         }
       }
     }

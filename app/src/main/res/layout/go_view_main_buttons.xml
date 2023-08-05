@@ -37,6 +37,15 @@
       app:layout_constraintTop_toBottomOf="@id/settings_button"
       />
 
+  <com.vk59.gotuda.design.GoCurrencyComponent
+      android:id="@+id/currency"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/search_view"
+      />
+
   <com.vk59.gotuda.design.IconButton
       android:id="@+id/geo_button"
       android:layout_width="wrap_content"
