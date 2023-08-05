@@ -2,8 +2,12 @@
   <string name="app_name">GoTuda</string>
   <string name="no_connection">Нет подключения к интернету</string>
   <string name="something_went_wrong">Что-то пошло не так</string>
+  <string name="permissions_location_not_granted">Нет необходимых разрешений</string>
+  <string name="permission_camera_not_granted">Необходимо получить разрешения для камеры</string>
   <string name="welcome_go_tuda">Добро пожаловать в GoTuda!</string>
   <string name="welcome_description">Здесь вы сможете подбирать места для прогулок по интересам</string>
   <string name="main_search_view_query_hint">Введите название объекта</string>
   <string name="user_qr_fragment_title">QR-код для скидки</string>
+  <string name="button_go_to_scan_qr">Отсканировать QR</string>
+  <string name="button_show_qr_code">Показать QR код</string>
 </resources>

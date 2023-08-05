@@ -28,7 +28,7 @@ class LocationRepository @Inject constructor(
 
   @SuppressLint("MissingPermission")
   fun listenToLocation(locationManager: LocationManager): Flow<MyGeoPoint> {
-    return permissionsRepository.availableToListenToGeo.dropWhile { !it }
+    return permissionsRepository.isLocationPermissionsGranted.dropWhile { !it }
       .flatMapLatest {
         requestGeoUpdates(locationManager)
         forceRequestGeoUpdates(locationManager)

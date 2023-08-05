@@ -2,17 +2,13 @@ package com.vk59.gotuda.presentation.main
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -34,6 +30,7 @@ import com.vk59.gotuda.map.actions.MapAction.SinglePlaceTap
 import com.vk59.gotuda.map.actions.MapActionsListener
 import com.vk59.gotuda.map.model.MapNotAttachedToWindowException
 import com.vk59.gotuda.map.model.MyGeoPoint
+import com.vk59.gotuda.permissions.PermissionsHelper
 import com.vk59.gotuda.presentation.main.MainFragmentState.FinishActivity
 import com.vk59.gotuda.presentation.main.MainFragmentState.LaunchPlace
 import com.vk59.gotuda.presentation.main.MainFragmentState.Main
@@ -78,17 +75,26 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
   @Inject
   lateinit var mainButtonsGoViewFactory: MainButtonsGoViewFactory
 
+  @Inject
+  lateinit var permissionsHelper: PermissionsHelper
+
   private var currentModalView: View? = null
+
   private var locationManager: LocationManager? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    locationManager = ContextCompat.getSystemService(requireContext(), LocationManager::class.java)
+    locationManager = getLocationManager()
     if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
       initLocationManager()
     } else {
       this.requestPermissions()
     }
+  }
+
+  private fun getLocationManager(): LocationManager? {
+    return locationManager ?: ContextCompat.getSystemService(requireContext(), LocationManager::class.java)
+      .also { locationManager = it }
   }
 
   @SuppressLint("ClickableViewAccessibility")
@@ -156,7 +162,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
         }
       }
     }
-    locationManager?.let {
+    getLocationManager()?.let {
       launchObserveGeoUpdates(it)
     }
     viewLifecycleOwner.lifecycleScope.launch {
@@ -207,15 +213,6 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     }
   }
 
-  override fun onStop() {
-    binding.mapKit.onStop()
-    MapKitFactory.getInstance().onStop()
-    this.mapController.detach()
-    binding.mapKit.map.addCameraListener(this)
-    super.onStop()
-    goViewsCoordinator.hideAll()
-  }
-
   private fun launchMainButtons(loading: Boolean = false) {
     currentModalView?.makeGone()
 
@@ -253,28 +250,24 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   @RequiresApi(VERSION_CODES.P)
   private fun initLocationManager() {
-    if (locationManager?.isLocationEnabled == true) {
+    if (getLocationManager()?.isLocationEnabled == true) {
       this.requestPermissions()
     }
   }
 
   private fun requestPermissions() {
-    if (ActivityCompat.checkSelfPermission(
-        requireContext(), permission.ACCESS_FINE_LOCATION
-      ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-        requireContext(), permission.ACCESS_COARSE_LOCATION
-      ) != PackageManager.PERMISSION_GRANTED
-    ) {
-      registerForActivityResult(
-        RequestMultiplePermissions(),
-      ) { isGranted ->
-        permissionsRepository.permissionsGranted(isGranted.values.all { it })
-        if (!isGranted.values.all { it }) {
-          Toast.makeText(requireContext(), "Permission denied :(", Toast.LENGTH_LONG).show()
-        }
-      }.launch(arrayOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION))
-    } else {
-      permissionsRepository.permissionsGranted(true)
+    lifecycleScope.launch {
+      if (!permissionsHelper.requestPermissionsIfNeeded(
+          this@MainFragment,
+          permission.ACCESS_FINE_LOCATION,
+          permission.ACCESS_COARSE_LOCATION
+        )
+      ) {
+        ErrorSnackbarFactory(binding.root).create(
+          R.drawable.ic_warning,
+          getString(R.string.permissions_location_not_granted)
+        ).show()
+      }
     }
   }
 
@@ -301,6 +294,20 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   private fun requireMapController(): MapController {
     return this.mapController
+  }
+
+  override fun onStop() {
+    binding.mapKit.onStop()
+    MapKitFactory.getInstance().onStop()
+    mapController.detach()
+    binding.mapKit.map.removeCameraListener(this)
+    goViewsCoordinator.hideAll()
+    super.onStop()
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    locationManager = null
   }
 
   companion object {

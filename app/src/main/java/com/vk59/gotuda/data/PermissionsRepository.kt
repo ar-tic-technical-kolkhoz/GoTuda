@@ -1,19 +1,32 @@
 package com.vk59.gotuda.data
 
+import android.Manifest.permission
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PermissionsRepository @Inject constructor() {
 
-  private val _availableToListenToGeo = MutableStateFlow(false)
+  private val grantedPermissions = MutableStateFlow<List<String>>(emptyList())
 
-  val availableToListenToGeo: Flow<Boolean>
-    get() = _availableToListenToGeo
+  val isLocationPermissionsGranted: Flow<Boolean>
+    get() = grantedPermissions.map { it.containsAll(LOCATION_PERMISSIONS) }
 
-  fun permissionsGranted(boolean: Boolean) {
-    _availableToListenToGeo.value = boolean
+
+  val isCameraPermissionsGranted: Flow<Boolean>
+    get() = grantedPermissions.map { it.containsAll(CAMERA_PERMISSION) }
+
+  fun permissionGranted(permissions: List<String>) {
+    grantedPermissions.value += permissions
+  }
+
+  companion object {
+
+    val LOCATION_PERMISSIONS = listOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION)
+
+    val CAMERA_PERMISSION = listOf(permission.CAMERA)
   }
 }

@@ -15,8 +15,10 @@ import com.google.zxing.BarcodeFormat.QR_CODE
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 import com.vk59.gotuda.R
+import com.vk59.gotuda.core.commitWithAnimation
 import com.vk59.gotuda.core.dpToPx
 import com.vk59.gotuda.databinding.FragmentUserQrBinding
+import com.vk59.gotuda.presentation.qr.scan.ScanQrFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -53,6 +55,13 @@ class UserQrFragment : Fragment(R.layout.fragment_user_qr) {
 
     binding.goBackButton.setOnClickListener {
       parentFragmentManager.popBackStack()
+    }
+
+    binding.goToScanQr.setOnClickListener {
+      parentFragmentManager.commitWithAnimation {
+        replace(R.id.fragment_container, ScanQrFragment())
+        addToBackStack("main")
+      }
     }
   }
 }

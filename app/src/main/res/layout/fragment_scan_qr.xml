@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/bgMain"
-    android:padding="@dimen/margin_border"
     >
 
   <ImageView
@@ -14,6 +13,7 @@
       android:layout_height="wrap_content"
       android:baselineAlignBottom="true"
       android:src="@drawable/ic_back"
+      android:layout_margin="@dimen/margin_border"
       app:layout_constraintBaseline_toBaselineOf="@id/title"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
@@ -27,43 +27,39 @@
       android:text="@string/user_qr_fragment_title"
       android:textColor="?attr/textTitle"
       android:textSize="24sp"
+      android:layout_margin="@dimen/margin_border"
+      app:layout_constraintBottom_toTopOf="@id/camera"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       />
 
-  <com.google.android.material.imageview.ShapeableImageView
-      android:id="@+id/qr"
-      android:layout_width="260dp"
-      android:layout_height="260dp"
-      android:background="?attr/bgIconButton"
+
+  <androidx.camera.view.PreviewView
+      android:id="@+id/camera"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      app:layout_constraintTop_toBottomOf="@id/title"
       app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      />
-
-  <com.google.android.material.progressindicator.CircularProgressIndicator
-      android:id="@+id/progress_indicator"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:indeterminate="true"
-      android:visibility="visible"
-      app:indicatorColor="?attr/bgMain"
-      app:layout_constraintBottom_toBottomOf="@id/qr"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="@id/qr"
-      />
+      app:layout_constraintEnd_toEndOf="parent"/>
 
   <com.vk59.gotuda.design.ButtonComponent
-      android:id="@+id/go_to_scan_qr"
+      android:id="@+id/go_to_qr"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      app:component_text_title="@string/button_go_to_scan_qr"
+      app:component_text_title="@string/button_show_qr_code"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintBottom_toBottomOf="parent"
+      android:layout_margin="20dp"
       />
 
+  <ImageView
+      android:id="@+id/bitmap_preview"
+      android:layout_width="50dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@id/camera"
+      />
 </androidx.constraintlayout.widget.ConstraintLayout>

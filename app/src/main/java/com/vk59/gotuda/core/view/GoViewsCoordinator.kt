@@ -24,7 +24,7 @@ class GoViewsCoordinator @Inject constructor() {
 
   fun hide(view: View) {
     val viewsToRemove = shownViews.filter { view == it.key }
-    viewsToRemove.forEach { deletingView, parent ->
+    viewsToRemove.forEach { (deletingView, parent) ->
       deletingView.makeGone()
       parent.removeView(deletingView)
     }
@@ -32,8 +32,8 @@ class GoViewsCoordinator @Inject constructor() {
   }
 
   fun hideAll() {
-    shownViews.values.forEach { parent ->
-      parent.removeAllViews()
+    shownViews.forEach { (view, parent) ->
+      parent.removeView(view)
     }
     shownViews.clear()
   }

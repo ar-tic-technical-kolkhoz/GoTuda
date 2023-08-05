@@ -52,7 +52,7 @@ class MainViewModel @Inject constructor(
 
   private val mapObjectsFlow = MutableStateFlow<List<PlaceMap>>(emptyList())
 
-  private val move = MutableStateFlow(Move(MyGeoPoint(0.0, 0.0)))
+  private val move = MutableStateFlow(Move(MyGeoPoint.DEFAULT))
 
   private val state = MutableStateFlow<MainFragmentState>(Main).also {
     it.onEach { errorFlow.value = ErrorState.None }
