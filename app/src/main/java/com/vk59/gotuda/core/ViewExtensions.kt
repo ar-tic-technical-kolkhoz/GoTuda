@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.annotation.DimenRes
 import androidx.annotation.Dimension
+import androidx.fragment.app.Fragment
 
 fun TextView.setTextSizeSp(size: Float) {
   setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
@@ -24,4 +25,9 @@ fun View.dimen(@DimenRes dimen: Int): Int {
 fun View.dpToPx(@Dimension(unit = Dimension.DP) dp: Int): Int {
   val r = context.resources
   return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), r.displayMetrics).toInt()
+}
+
+fun Fragment.dpToPx(@Dimension(unit = Dimension.DP) dp: Int): Int {
+  val r = this.context?.resources
+  return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), r?.displayMetrics).toInt()
 }

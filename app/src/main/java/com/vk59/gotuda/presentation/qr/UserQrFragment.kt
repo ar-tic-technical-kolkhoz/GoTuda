@@ -10,10 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.shape.CornerFamily
 import com.google.zxing.BarcodeFormat.QR_CODE
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 import com.vk59.gotuda.R
+import com.vk59.gotuda.core.dpToPx
 import com.vk59.gotuda.databinding.FragmentUserQrBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -26,6 +28,8 @@ class UserQrFragment : Fragment(R.layout.fragment_user_qr) {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+    binding.qr.shapeAppearanceModel =
+      binding.qr.shapeAppearanceModel.toBuilder().setAllCorners(CornerFamily.ROUNDED, dpToPx(16).toFloat()).build()
     lifecycleScope.launch {
       viewModel.qrUrlFlow().collectLatest {
         val writer = QRCodeWriter()
