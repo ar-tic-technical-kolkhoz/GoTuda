@@ -10,10 +10,9 @@ import androidx.annotation.RequiresPermission
 import com.vk59.gotuda.map.model.MyGeoPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
@@ -21,26 +20,25 @@ import javax.inject.Singleton
 
 @Singleton
 class LocationRepository @Inject constructor(
-  private val lastKnownLocationRepository: LastKnownLocationRepository
+  private val permissionsRepository: PermissionsRepository,
+  private val lastKnownLocationRepository: LastKnownLocationRepository,
 ) {
 
   private val locationStateFlow = MutableStateFlow<MyGeoPoint?>(null)
 
-  private val permissionsGranted = MutableStateFlow(false)
-
   @SuppressLint("MissingPermission")
   fun listenToLocation(locationManager: LocationManager): Flow<MyGeoPoint> {
-    requestGeoUpdates(locationManager)
-    forceRequestGeoUpdates(locationManager)
-    return locationStateFlow
-      .combine(permissionsGranted) { loc, granted ->
-        Pair(loc, granted)
-      }.filter { !it.second }
-      .map { it.first }
-      .onEach { point -> point?.let { lastKnownLocationRepository.saveLastKnownLocation(it) } }
-      .onStart {
-        emit(lastKnownLocationRepository.getLastKnownLocation() ?: MyGeoPoint(0.0, 0.0))
-      }.filterNotNull()
+    return permissionsRepository.availableToListenToGeo.dropWhile { !it }
+      .flatMapLatest {
+        requestGeoUpdates(locationManager)
+        forceRequestGeoUpdates(locationManager)
+        locationStateFlow
+          .onEach { point -> point?.let { lastKnownLocationRepository.saveLastKnownLocation(it) } }
+          .onStart {
+            emit(lastKnownLocationRepository.getLastKnownLocation() ?: MyGeoPoint(0.0, 0.0))
+          }.filterNotNull()
+      }
+      .onStart { emit(MyGeoPoint.DEFAULT) }
   }
 
   fun obtainLocation(): MyGeoPoint? {

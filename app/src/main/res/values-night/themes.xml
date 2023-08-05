@@ -2,27 +2,27 @@
   <!-- Base application theme. -->
   <style name="Theme.GoTuda" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     <!-- Primary brand color. -->
-    <item name="colorPrimary">@color/purple_200</item>
-    <item name="colorPrimaryVariant">@color/purple_700</item>
+    <item name="colorPrimary">@color/blue_dark</item>
+    <item name="colorPrimaryVariant">@color/blue_dark</item>
     <item name="colorOnPrimary">@color/black</item>
     <!-- Secondary brand color. -->
     <item name="colorSecondary">@color/teal_200</item>
     <item name="colorSecondaryVariant">@color/teal_200</item>
     <item name="colorOnSecondary">@color/black</item>
     <!-- Status bar color. -->
-    <item name="android:statusBarColor">@color/black</item>
-    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:statusBarColor">@color/blue_dark</item>
+<!--    <item name="android:windowLightStatusBar">false</item>-->
     <!-- Customize your theme here. -->
 
-    <item name="bgMain">@color/black</item>
-    <item name="bgMinor">@color/white</item>
-    <item name="textMain">@color/white</item>
+    <item name="bgMain">@color/blue_dark</item>
+    <item name="bgMinor">@color/black</item>
+    <item name="textMain">@color/black</item>
     <item name="textMinor">#BDBDBD</item>
-    <item name="controlMain">@color/green_dark</item>
-    <item name="textOnControlMain">@color/white</item>
+    <item name="controlMain">@color/viol</item>
     <item name="controlMinor">@color/dark_grey</item>
+    <item name="textOnControlMain">@color/white</item>
     <item name="textOnControlMinor">@color/white</item>
-    <item name="controlDanger">@color/orange_dark</item>
+    <item name="controlDanger">@color/orange</item>
     <item name="line">@color/dark_grey</item>
     <item name="mapObject">#797979</item>
   </style>

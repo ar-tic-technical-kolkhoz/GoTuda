@@ -88,7 +88,7 @@ class MapOverlay @AssistedInject constructor(
     val userLocation = requireUserLocationCollection()
     val newPlacemark = userLocation.addPlacemark(
       Point(geoPoint.latitude, geoPoint.longitude),
-      fromDrawable(context, R.drawable.ic_user_geo)
+      fromDrawable(context, R.drawable.user_geo)
     )
 
     handler.postDelayed(

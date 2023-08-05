@@ -3,6 +3,7 @@ package com.vk59.gotuda.presentation.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.vk59.gotuda.BuildConfig
 import com.vk59.gotuda.core.coroutines.AppDispatcher
 import com.vk59.gotuda.core.utils.Event
 import com.vk59.gotuda.data.AccountSharedRepository
@@ -14,6 +15,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,14 +49,17 @@ class OnboardingViewModel @Inject constructor(
       return
     }
     viewModelScope.launch(AppDispatcher.io() + exceptionHandler) {
-      try {
-        val user = authRepository.getUserByEmail(email)
-        registerOrSaveUser(user, email, name, googleId)
-        status.value = Event.Success
-      } catch (e: Throwable) {
-        registerOrSaveUser(null, email, name, googleId)
-        onError.invoke(e)
-      }
+      launchAuthorization(email, googleId, name)
+    }
+  }
+
+  private suspend fun launchAuthorization(email: String, googleId: String, name: String) {
+    try {
+      val user = authRepository.getUserByEmail(email)
+      registerOrSaveUser(user, email, name, googleId)
+      status.value = Event.Success
+    } catch (e: Throwable) {
+      onError.invoke(e)
     }
   }
 
@@ -78,5 +83,15 @@ class OnboardingViewModel @Inject constructor(
   private suspend fun saveUser(userInfo: UserInfo) {
     authRepository.authorized(userInfo)
     accountSharedRepository.saveUserInfo(userInfo)
+  }
+
+  fun error(throwable: Throwable) {
+    if (throwable is GoogleAuthorizationException && throwable.cause !is ConnectException && BuildConfig.DEBUG) {
+      viewModelScope.launch {
+        launchAuthorization("ivan@gmail.com", "1", "ivan")
+      }
+    } else {
+      status.value = Event.Error(throwable)
+    }
   }
 }

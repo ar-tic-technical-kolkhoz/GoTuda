@@ -11,8 +11,14 @@ fun TextView.setTextSizeSp(size: Float) {
   setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
 }
 
+@Dimension
 fun Context.dimen(@DimenRes dimen: Int): Int {
   return resources.getDimension(dimen).toInt()
+}
+
+@Dimension
+fun View.dimen(@DimenRes dimen: Int): Int {
+  return context.dimen(dimen)
 }
 
 fun View.dpToPx(@Dimension(unit = Dimension.DP) dp: Int): Int {

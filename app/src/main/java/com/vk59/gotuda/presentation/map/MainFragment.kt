@@ -28,6 +28,7 @@ import com.vk59.gotuda.core.fadeIn
 import com.vk59.gotuda.core.fadeOut
 import com.vk59.gotuda.core.makeGone
 import com.vk59.gotuda.core.makeVisible
+import com.vk59.gotuda.data.PermissionsRepository
 import com.vk59.gotuda.data.mock.Mocks.DEFAULT_PHOTO_URL
 import com.vk59.gotuda.data.model.PlaceToVisit
 import com.vk59.gotuda.databinding.FragmentMainBinding
@@ -70,6 +71,9 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
 
   @Inject
   lateinit var mapController: MapController
+
+  @Inject
+  lateinit var permissionsRepository: PermissionsRepository
 
   private var currentModalView: View? = null
   private var locationManager: LocationManager? = null
@@ -287,6 +291,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
       registerForActivityResult(
         RequestMultiplePermissions(),
       ) { isGranted ->
+        permissionsRepository.permissionsGranted(isGranted.values.all { it })
         if (!isGranted.values.all { it }) {
           Toast.makeText(requireContext(), "Permission denied :(", Toast.LENGTH_LONG).show()
         }

@@ -33,18 +33,12 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
       val task = GoogleSignIn.getSignedInAccountFromIntent(result?.data)
       try {
+        if (task.isCanceled) {
+          throw GoogleAuthorizationCancelledException(ConnectException())
+        }
         authorizeWithAccount(task.result)
-      } catch (exception: ConnectException) {
-        ErrorSnackbarFactory(binding.root).create(
-          R.drawable.ic_connection_off,
-          getString(R.string.no_connection)
-        ).show()
-      } catch (exception: Exception) {
-        ErrorSnackbarFactory(binding.root).create(
-          R.drawable.ic_warning,
-          getString(R.string.something_went_wrong)
-        ).show()
-        Timber.e(exception)
+      } catch (t: Throwable) {
+        viewModel.error(GoogleAuthorizationException(t))
       }
     }
 
@@ -68,15 +62,32 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
       viewModel.listenToEvent().collectLatest {
         when (it) {
           is Event.Error -> {
+            when (it.throwable) {
+              is ConnectException -> {
+                ErrorSnackbarFactory(binding.root).create(
+                  R.drawable.ic_connection_off,
+                  getString(R.string.no_connection)
+                ).show()
+              }
+
+              else -> {
+                ErrorSnackbarFactory(binding.root).create(
+                  R.drawable.ic_warning,
+                  getString(R.string.something_went_wrong)
+                ).show()
+              }
+            }
             binding.signInButton.setProgressing(false)
             Timber.e(it.throwable)
             ErrorSnackbarFactory(binding.root)
               .create(R.drawable.ic_warning, getString(R.string.something_went_wrong))
               .show()
           }
+
           is Event.Success -> {
             binding.signInButton.setProgressing(false)
           }
+
           is Event.Loading -> {
             binding.signInButton.setProgressing(true)
           }

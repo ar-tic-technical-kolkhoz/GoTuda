@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.vk59.gotuda.R
 import com.vk59.gotuda.core.colorAttr
+import com.vk59.gotuda.core.dimen
 import com.vk59.gotuda.databinding.ButtonComponentBinding
 
 class ButtonComponent @JvmOverloads constructor(
@@ -49,6 +50,12 @@ class ButtonComponent @JvmOverloads constructor(
     binding.subtitle.setTextColor(textColor)
     setTitleSizePx(titleTextSize)
     isClickable = true
+    binding.root.setPadding(
+      dimen(R.dimen.button_component_padding),
+      dimen(R.dimen.button_component_padding),
+      dimen(R.dimen.button_component_padding),
+      dimen(R.dimen.button_component_padding)
+    )
   }
 
   fun setTitle(text: CharSequence) {

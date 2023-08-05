@@ -17,10 +17,10 @@ class ErrorSnackbarFactory(private val view: View) {
     val sbTextView = view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
     sbTextView.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
     sbTextView.setTextColor(view.colorAttr(R.attr.textMain))
-    snackbar.setBackgroundTint(view.colorAttr(R.attr.bgMain))
+    snackbar.setBackgroundTint(view.colorAttr(R.attr.bgMinor))
     val params = view.layoutParams as FrameLayout.LayoutParams
-    params.gravity = Gravity.BOTTOM
-    params.bottomMargin = view.dpToPx(16)
+    params.gravity = Gravity.TOP
+    params.topMargin = view.dpToPx(20)
     view.layoutParams = params
     return snackbar
   }
