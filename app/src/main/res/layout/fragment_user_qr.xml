@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/bgMain"
+    android:padding="@dimen/margin_border"
+    >
+
+  <ImageView
+      android:id="@+id/go_back_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:baselineAlignBottom="true"
+      app:layout_constraintBaseline_toBaselineOf="@id/title"
+      android:src="@drawable/ic_back"
+      app:tint="?attr/textMain"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      />
+
+  <TextView
+      android:id="@+id/title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/user_qr_fragment_title"
+      android:textColor="?attr/textTitle"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      android:textSize="24sp"
+      />
+
+  <ImageView
+    android:id="@+id/qr"
+      android:layout_width="260dp"
+      android:layout_height="260dp"
+      android:background="?attr/bgIconButton"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+    />
+
+  <com.google.android.material.progressindicator.CircularProgressIndicator
+      android:id="@+id/progress_indicator"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:indicatorColor="?attr/bgMain"
+      android:indeterminate="true"
+      android:visibility="visible"
+      app:layout_constraintTop_toTopOf="@id/qr"
+      app:layout_constraintBottom_toBottomOf="@id/qr"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

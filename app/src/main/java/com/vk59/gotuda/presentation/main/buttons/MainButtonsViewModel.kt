@@ -11,4 +11,6 @@ interface MainButtonsViewModel {
   fun listenToLocationButton(): Flow<Boolean>
 
   fun followToUserLocation()
+
+  fun qrButtonClicked()
 }

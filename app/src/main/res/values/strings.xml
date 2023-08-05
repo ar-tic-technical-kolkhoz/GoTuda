@@ -5,4 +5,5 @@
   <string name="welcome_go_tuda">Добро пожаловать в GoTuda!</string>
   <string name="welcome_description">Здесь вы сможете подбирать места для прогулок по интересам</string>
   <string name="main_search_view_query_hint">Введите название объекта</string>
+  <string name="user_qr_fragment_title">QR-код для скидки</string>
 </resources>

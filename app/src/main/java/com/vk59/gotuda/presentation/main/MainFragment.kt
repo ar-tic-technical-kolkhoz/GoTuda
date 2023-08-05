@@ -41,6 +41,7 @@ import com.vk59.gotuda.presentation.main.MainFragmentState.MainButtonLoading
 import com.vk59.gotuda.presentation.main.MapViewType.MAPKIT
 import com.vk59.gotuda.presentation.main.buttons.MainButtonsGoViewFactory
 import com.vk59.gotuda.presentation.profile.ProfileFragment
+import com.vk59.gotuda.presentation.qr.UserQrFragment
 import com.vk59.gotuda.presentation.settings.SettingsFragment
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.map.CameraListener
@@ -99,7 +100,12 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
         launchSettings()
       }
     }
-    launchMainButtons()
+    lifecycleScope.launch {
+      viewModel.listenToQrButtonClicked().collectLatest {
+        viewModel.userQrOpened()
+        launchUserQr()
+      }
+    }
     val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
       override fun handleOnBackPressed() = viewModel.backPressed()
     }
@@ -122,11 +128,19 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     }
   }
 
+  private fun launchUserQr() {
+    parentFragmentManager.commitWithAnimation {
+      replace(R.id.fragment_container, UserQrFragment())
+      addToBackStack("main")
+    }
+  }
+
   override fun onStart() {
     MapKitFactory.getInstance().onStart()
     binding.mapKit.onStart()
     super.onStart()
     binding.mapKit.map.addCameraListener(this)
+    launchMainButtons()
   }
 
   override fun onResume() {
@@ -199,6 +213,7 @@ class MainFragment : Fragment(R.layout.fragment_main), CameraListener, MapAction
     this.mapController.detach()
     binding.mapKit.map.addCameraListener(this)
     super.onStop()
+    goViewsCoordinator.hideAll()
   }
 
   private fun launchMainButtons(loading: Boolean = false) {

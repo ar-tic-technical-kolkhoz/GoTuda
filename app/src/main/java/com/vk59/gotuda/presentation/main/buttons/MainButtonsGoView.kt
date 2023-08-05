@@ -58,6 +58,9 @@ class MainButtonsGoView @AssistedInject constructor(
         viewModel.followToUserLocation()
         viewModel.moveToUserGeo()
       }
+      qrButton.setOnClickListener {
+        viewModel.qrButtonClicked()
+      }
     }
     scope.launch {
       viewModel.listenToLocationButton().collectLatest {

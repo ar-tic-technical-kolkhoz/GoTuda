@@ -64,6 +64,8 @@ class MainViewModel @Inject constructor(
 
   private val goToSettingsFlow = MutableStateFlow(false)
 
+  private val goToQrFlow = MutableStateFlow(false)
+
   fun backPressed() {
     state.value = when (state.value) {
       is LaunchPlace -> Main
@@ -137,8 +139,12 @@ class MainViewModel @Inject constructor(
     return lastKnownLocationRepository.getLastKnownLocation()
   }
 
-  private fun setViewType(viewType: MapViewType) {
-    _mapViewType.value = viewType
+  override fun qrButtonClicked() {
+    goToQrFlow.value = true
+  }
+
+  fun listenToQrButtonClicked(): Flow<Boolean> {
+    return goToQrFlow.filter { it }
   }
 
   fun placeTapped(mapObjectId: String) {
@@ -191,6 +197,10 @@ class MainViewModel @Inject constructor(
     list.replaceAll { if (it.selected) it.copy(selected = false) else it }
     mapObjectsFlow.value = list
     routesFlow.value = None
+  }
+
+  fun userQrOpened() {
+    goToQrFlow.value = false
   }
 }
 

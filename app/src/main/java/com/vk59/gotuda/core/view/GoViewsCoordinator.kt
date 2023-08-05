@@ -10,7 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class GoViewsCoordinator @Inject constructor() {
 
-  private val shownView = mutableMapOf<View, ViewGroup>()
+  private val shownViews = mutableMapOf<View, ViewGroup>()
 
   fun show(view: View, parent: ViewGroup) {
     view.apply {
@@ -19,12 +19,22 @@ class GoViewsCoordinator @Inject constructor() {
     parent.addView(view.apply {
       bringToFront()
     })
+    shownViews[view] = parent
   }
 
   fun hide(view: View) {
-    shownView.filter { view == it.key }.forEach { deletingView, parent ->
+    val viewsToRemove = shownViews.filter { view == it.key }
+    viewsToRemove.forEach { deletingView, parent ->
       deletingView.makeGone()
       parent.removeView(deletingView)
     }
+    shownViews.remove(view)
+  }
+
+  fun hideAll() {
+    shownViews.values.forEach { parent ->
+      parent.removeAllViews()
+    }
+    shownViews.clear()
   }
 }

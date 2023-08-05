@@ -19,6 +19,7 @@
     <item name="bgMinor">@color/black</item>
     <item name="textMain">@color/white</item>
     <item name="textMinor">#BDBDBD</item>
+    <item name="textTitle">@color/turquoise</item>
     <item name="controlMain">@color/viol</item>
     <item name="controlMinor">@color/dark_grey</item>
     <item name="textOnControlMain">@color/white</item>
