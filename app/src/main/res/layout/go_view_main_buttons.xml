@@ -12,6 +12,7 @@
       android:id="@+id/search_view"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:elevation="4dp"
       android:background="@drawable/bg_search_view"
       android:queryHint="@string/main_search_view_query_hint"
       app:layout_constraintEnd_toEndOf="parent"
