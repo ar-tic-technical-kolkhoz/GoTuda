@@ -39,7 +39,7 @@
       />
 
   <com.vk59.gotuda.design.GoCurrencyComponent
-      android:id="@+id/currency"
+      android:id="@+id/currency_sign"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="16dp"

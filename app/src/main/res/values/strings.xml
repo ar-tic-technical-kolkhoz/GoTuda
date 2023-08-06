@@ -10,4 +10,7 @@
   <string name="user_qr_fragment_title">QR-код для скидки</string>
   <string name="button_go_to_scan_qr">Отсканировать QR</string>
   <string name="button_show_qr_code">Показать QR код</string>
+  <string name="title_getting_currency">Поздравляем!</string>
+  <string name="common_great">Отлично!</string>
+  <string name="reward_description">За посещения объекта N вы получиди 8 Go-шек. Теперь вы можете их потратить на посещение заведения из списка.</string>
 </resources>

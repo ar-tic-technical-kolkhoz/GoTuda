@@ -18,8 +18,11 @@ import com.vk59.gotuda.databinding.FragmentScanQrBinding
 import com.vk59.gotuda.design.ErrorSnackbarFactory
 import com.vk59.gotuda.permissions.PermissionsHelper
 import com.vk59.gotuda.presentation.qr.UserQrFragment
+import com.vk59.gotuda.presentation.qr.reward.ScanQrRewardFragment
+import com.vk59.gotuda.presentation.qr.scan.ScanQrViewModel.Event.QrVerified
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -55,11 +58,10 @@ class ScanQrFragment : Fragment(R.layout.fragment_scan_qr) {
       parentFragmentManager.popBackStack()
     }
     lifecycleScope.launch {
-      viewModel.qrTextFlow.collectLatest { qrText ->
-        ErrorSnackbarFactory(binding.root).create(
-          R.drawable.ic_warning,
-          "QR found: $qrText"
-        ).show()
+      val verified: QrVerified = viewModel.eventFlow.filterIsInstance<QrVerified>().first()
+      parentFragmentManager.commitWithAnimation {
+        val bundle = Bundle().apply { putString("reward", verified.rewardGos) }
+        replace(R.id.fragment_container, ScanQrRewardFragment::class.java, bundle)
       }
     }
   }
